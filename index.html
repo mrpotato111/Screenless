@@ -155,6 +155,49 @@
       document.getElementById('display-global-limit').innerText = e.target.value + 'h 00m';
       document.querySelector('#screen-hub h1').innerText = e.target.value + 'h 00m';
     });
+    const activities = [
+      { label: "Read 10 pages of a book", time: 10 },
+      { label: "Go for a 15m walk", time: 15 },
+      { label: "Meditation / Breathing", time: 5 },
+      { label: "Sketch something for 10m", time: 10 }
+    ];
+
+    function goToIntervention(appName) {
+      document.getElementById('target-app').innerText = appName;
+      const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+      const actBtn = document.getElementById('activity-btn');
+      actBtn.innerText = randomActivity.label;
+      actBtn.dataset.minutes = randomActivity.time;
+
+      // Switch to intervention screen
+      showScreen('screen-intervention');
+      // Hide nav bar so they are "forced" to choose
+      document.querySelector('.bottom-nav').style.display = 'none';
+    }
+
+    function startActivity() {
+      const minutes = document.getElementById('activity-btn').dataset.minutes;
+      document.getElementById('timer-label').innerText = document.getElementById('activity-btn').innerText;
+      document.getElementById('timer-clock').innerText = minutes + ":00";
+
+      showScreen('screen-timer');
+    }
+
+    function goToBlackScreen() {
+      showScreen('screen-black');
+      document.querySelector('.bottom-nav').style.display = 'none';
+    }
+
+    // Wrap the original showScreen to handle the Nav Bar visibility
+    const baseShowScreen = showScreen;
+    showScreen = function(id) {
+      // Show nav bar only on primary screens
+      const primaryScreens = ['screen-hub', 'screen-limits', 'screen-permissions', 'screen-simulation'];
+      document.querySelector('.bottom-nav').style.display = primaryScreens.includes(id) ? 'flex' : 'none';
+
+      baseShowScreen(id);
+    }
+
 
     // Initial render
     renderHub();
@@ -179,19 +222,58 @@
   </div>
 
   <nav class="bottom-nav">
-    <div class="nav-item" onclick="showScreen('screen-permissions')">
-      <span class="nav-icon">🛡️</span>
-      <span class="nav-label">Security</span>
-    </div>
-    <div class="nav-item active" onclick="showScreen('screen-hub')">
-      <span class="nav-icon">🏠</span>
-      <span class="nav-label">Home</span>
-    </div>
-    <div class="nav-item" onclick="showScreen('screen-limits')">
-      <span class="nav-icon">⚙️</span>
-      <span class="nav-label">Settings</span>
-    </div>
+    <div class="nav-item" onclick="showScreen('screen-permissions')"><span class="nav-icon">🛡️</span><span class="nav-label">Security</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-hub')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
+    <div class="nav-item" onclick="showScreen('screen-limits')"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></div>
+    <div class="nav-item" onclick="showScreen('screen-simulation')"><span class="nav-icon">📱</span><span class="nav-label">Sim</span></div>
   </nav>
+
+  <div id="screen-simulation" class="screen">
+    <header><h1>Phone Mockup</h1></header>
+    <div class="phone-grid">
+      <div class="app-box" onclick="goToIntervention('Instagram')">Instagram</div>
+      <div class="app-box" onclick="goToIntervention('TikTok')">TikTok</div>
+    </div>
+  </div>
+
+  <div id="screen-intervention" class="screen">
+    <div class="intervention-container">
+      <div class="icon-box" style="width: 60px; height: 60px; margin: 0 auto 20px; font-size: 2rem;">⚠️</div>
+      <h2>Hold on!</h2>
+      <p>Are you sure you want to open <span id="target-app" style="color: var(--accent-green);"></span>?</p>
+      <p class="sub-text" style="margin-bottom: 30px;">It looks like you've reached your limit. Why not try this instead:</p>
+
+      <button id="activity-btn" class="btn-primary" style="position: static; transform: none; width: 100%;" onclick="startActivity()">
+        Go for a 15m Walk
+      </button>
+
+      <button class="override-btn" style="margin-top: 40px; border: none; text-decoration: underline;" onclick="goToBlackScreen()">
+        Ignore and open anyway
+      </button>
+    </div>
+  </div>
+
+  <div id="screen-timer" class="screen">
+    <div class="timer-container">
+      <h2 id="timer-label">Walking...</h2>
+      <div class="timer-display" id="timer-clock">15:00</div>
+      <div class="progress-bg" style="width: 80%; margin: 20px auto;">
+        <div class="progress-fill" style="width: 100%; animation: shrink 900s linear forwards;"></div>
+      </div>
+      <button class="override-btn" style="margin-top: 50px;" onclick="goToBlackScreen()">I GIVE UP (OVERRIDE)</button>
+    </div>
+  </div>
+
+  <div id="screen-black" class="screen" style="background: black; z-index: 1000; padding: 0;">
+    <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+      <p style="color: #222;">Instagram Content Loaded...</p>
+
+      <button class="exit-app-btn" onclick="showScreen('screen-simulation')">
+        ✕ Close App
+      </button>
+    </div>
+  </div>
+
 </div>
 
 <script>
