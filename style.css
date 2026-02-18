@@ -1,0 +1,178 @@
+:root {
+    --bg-color: #0f0f12;
+    --card-bg: #1e1e24;
+
+    /* Green Color Palette */
+    --accent-green: #4ade80;       /* Bright green for toggles/accents */
+    --primary-green: #22c55e;      /* Main green for buttons */
+    --dark-green: #166534;         /* Deep green for icon backgrounds */
+    --gradient-start: #4ade80;
+    --gradient-end: #16a34a;
+
+    --text-main: #ffffff;
+    --text-dim: #a0a0a0;
+    --danger: #ef4444;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+}
+
+.mobile-container {
+    width: 375px;
+    height: 812px;
+    background: var(--bg-color);
+    position: relative;
+    overflow-y: auto;
+    border: 1px solid #333;
+}
+
+/* Header Styling */
+header {
+    padding: 40px 20px 20px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Screen Transitions */
+.screen {
+    display: none;
+    padding: 0 20px 100px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.screen.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card Styling */
+.card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #2d2d35;
+}
+
+.card-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(74, 222, 128, 0.1); /* Subtle green glow */
+    color: var(--accent-green);
+    font-size: 1.2rem;
+}
+
+.label-text {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.sub-text {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+/* Progress Bar (Green Gradient) */
+.progress-bg {
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    border-radius: 4px;
+}
+
+/* Buttons */
+.btn-primary {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 315px;
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
+    transition: background 0.2s;
+}
+
+.btn-primary:active {
+    background: var(--dark-green);
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #444;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: var(--primary-green); }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* Custom text color for limits */
+.limit-value {
+    color: var(--accent-green);
+    font-weight: bold;
+}

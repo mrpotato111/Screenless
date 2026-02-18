@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="mobile-container">
+  <header>
+    <h1 id="screen-title">Permissions</h1>
+  </header>
+
+  <div id="screen-permissions" class="screen active">
+    <div class="card">
+      <div class="card-info">
+        <div class="icon-box">🛡️</div>
+        <div>
+          <span class="label-text">Usage Access</span>
+          <span class="sub-text">Monitor app activity</span>
+        </div>
+      </div>
+      <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+    </div>
+    <div class="card">
+      <div class="card-info">
+        <div class="icon-box">📍</div>
+        <div>
+          <span class="label-text">Location</span>
+          <span class="sub-text">For local time zones</span>
+        </div>
+      </div>
+      <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+    </div>
+    <button class="btn-primary" onclick="showScreen('screen-limits', 'App Limits')">Continue</button>
+  </div>
+
+  <div id="screen-limits" class="screen">
+    <div class="card">
+      <div class="card-info">
+        <div class="icon-box">📱</div>
+        <div>
+          <span class="label-text">Social Media</span>
+          <span class="sub-text">Instagram, TikTok, X</span>
+        </div>
+      </div>
+      <span style="color: var(--accent-green); font-weight: bold;">1h 15m</span>
+    </div>
+    <div class="card">
+      <div class="card-info">
+        <div class="icon-box">🎮</div>
+        <div>
+          <span class="label-text">Games</span>
+          <span class="sub-text">Roblox, Among Us</span>
+        </div>
+      </div>
+      <span style="color: var(--accent-green); font-weight: bold;">45m</span>
+    </div>
+    <button class="btn-primary" onclick="showScreen('screen-history', 'Usage History')">Save Limits</button>
+  </div>
+
+  <div id="screen-history" class="screen">
+    <div class="card">
+      <div style="width: 100%;">
+        <div style="display: flex; justify-content: space-between;">
+          <span class="label-text">Today's Usage</span>
+          <span class="label-text">3h 42m</span>
+        </div>
+        <div class="progress-bg"><div class="progress-fill" style="width: 80%;"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-info">
+        <div class="icon-box">📊</div>
+        <div>
+          <span class="label-text">Weekly Average</span>
+          <span class="sub-text">Down 12% from last week</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="showScreen('screen-permissions', 'Permissions')">Back to Start</button>
+  </div>
+</div>
+
+<script>
+  function showScreen(id, title) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('screen-title').innerText = title;
+  }
+</script>
+
+</body>
+</html>
