@@ -19,4 +19,4 @@ def get_limit_value(record_id, field_name):
 
 if __name__ == "__main__":
     # Example ID
-    get_limit_value("rec1234567890", "TimeLimit")
+    get_limit_value("recMHKiRmlCeF90kX", "Screen_time_limit")
