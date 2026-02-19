@@ -1,294 +1,256 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="et">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
   <title>Screenless Hub</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div class="mobile-container">
-  <div id="screen-hub" class="screen active">
-    <header>
-      <span class="sub-text">Total Usage</span>
-      <h1>5h 24m</h1>
+
+  <div id="screen-home" class="screen active">
+    <header class="main-header">
+      <div class="logo-box">
+        <div class="logo-circle">🌳</div>
+        <span>Screenless</span>
+      </div>
+      <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
     </header>
 
-    <div class="card chart-container">
-      <span class="label-text">Weekly Activity</span>
-      <div class="graph-wrapper">
-        <div class="bar" style="height: 40%"><span class="day">M</span></div>
-        <div class="bar" style="height: 65%"><span class="day">T</span></div>
-        <div class="bar" style="height: 85%"><span class="day">W</span></div>
-        <div class="bar" style="height: 50%"><span class="day">T</span></div>
-        <div class="bar active" style="height: 95%"><span class="day">F</span></div>
-        <div class="bar" style="height: 30%"><span class="day">S</span></div>
-        <div class="bar" style="height: 20%"><span class="day">S</span></div>
+    <div class="card progress-card">
+      <div class="progress-header">
+        <div class="level-info">
+          <span class="label-text">Progress</span>
+          <h2 class="level-number">11</h2>
+          <span class="xp-text">Xp: 1487/2000</span>
+        </div>
+        <div class="streak-badge">
+          <span class="sub-text">Days Streak</span>
+          <div class="streak-val">🔥 27</div>
+        </div>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-fill" style="width: 65%;"></div>
+      </div>
+      <span class="next-level-text">533xp until next level</span>
+    </div>
+
+    <div class="card simple-card">
+      <span class="label-text">On Screen Today</span>
+      <span class="time-val"><span class="icon-green">⏱</span> <span id="hub-daily-total">52min</span></span>
+    </div>
+
+    <h3 class="section-title">Today's Plan</h3>
+    <div class="card action-card">
+      <div class="card-left">
+        <span class="icon-green">⚡</span>
+        <span class="label-text">Exercise For 30 Min</span>
+      </div>
+      <div class="check-box checked">✓</div>
+    </div>
+    <div class="card action-card">
+      <div class="card-left">
+        <span class="icon-green">📖</span>
+        <span class="label-text">Read For 45 Min</span>
+      </div>
+      <div class="add-box">+</div>
+    </div>
+
+    <h3 class="section-title">Reminders</h3>
+    <div class="card action-card">
+      <div class="card-left">
+        <span class="icon-green">📞</span>
+        <div>
+          <span class="label-text">Call Mom</span>
+          <span class="sub-text">Meditate for 10 minutes</span>
+        </div>
+      </div>
+      <div class="add-box">+</div>
+    </div>
+  </div>
+
+  <div id="screen-apps" class="screen">
+    <header class="apps-header">
+      <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
+      <div class="logo-circle">🌳</div>
+      <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
+    </header>
+
+    <h2 class="page-title">Apps</h2>
+
+    <div class="chart-section">
+      <div class="y-axis">
+        <span>12h</span><span>9h</span><span>6h</span><span>3h</span><span>0h</span>
+      </div>
+      <div class="bars-container">
+        <div class="bar-wrapper">
+          <div class="bar-thin" style="height: 60%;"></div><span>M</span>
+        </div>
+        <div class="bar-wrapper">
+          <div class="bar-thin" style="height: 30%;"></div><span>T</span>
+        </div>
+        <div class="bar-wrapper">
+          <div class="bar-thin" style="height: 85%;"></div><span>W</span>
+        </div>
+        <div class="bar-wrapper">
+          <div class="bar-thin" style="height: 40%;"></div><span>T</span>
+        </div>
+        <div class="bar-wrapper">
+          <div class="bar-thin" style="height: 70%;"></div><span>F</span>
+        </div>
+        <div class="bar-wrapper">
+          <div class="bar-thin" style="height: 50%;"></div><span>S</span>
+        </div>
+        <div class="bar-wrapper">
+          <div class="bar-thin" style="height: 30%;"></div><span>S</span>
+        </div>
       </div>
     </div>
 
-    <h3 class="section-title">App Breakdown</h3>
-    <div class="app-list">
-      <div class="card">
-        <div class="card-info">
-          <div class="icon-box">📸</div>
-          <div><span class="label-text">Instagram</span><span class="sub-text">Social</span></div>
+    <h3 class="section-title">Screen Time Last Week</h3>
+    <div class="card stats-card">
+      <div class="stats-container">
+        <div class="stats-main">
+          <span class="total-label">TOTAL</span>
+          <h2 class="total-time">45h 21m</h2>
         </div>
-        <span class="limit-value">2h 10m</span>
+        <div class="stats-details">
+          <div class="stats-item">
+            <span class="dot apps"></span>
+            <span class="label">Apps</span>
+            <span class="val">28h 15m</span>
+          </div>
+          <div class="stats-item">
+            <span class="dot web"></span>
+            <span class="label">Web</span>
+            <span class="val">12h 40m</span>
+          </div>
+          <div class="stats-item">
+            <span class="dot other"></span>
+            <span class="label">Other</span>
+            <span class="val">4h 26m</span>
+          </div>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-info">
-          <div class="icon-box">🎬</div>
-          <div><span class="label-text">YouTube</span><span class="sub-text">Video</span></div>
-        </div>
-        <span class="limit-value">1h 45m</span>
+    </div>
+
+    <h3 class="section-title">Daily Overview</h3>
+    <div class="card integrated-table">
+      <div class="table-header">
+        <span class="col-main">App</span>
+        <span class="col-usage">Usage</span>
+        <span class="col-limit">Limit</span>
       </div>
-      <div class="card">
-        <div class="card-info">
-          <div class="icon-box">🎮</div>
-          <div><span class="label-text">Roblox</span><span class="sub-text">Gaming</span></div>
-        </div>
-        <span class="limit-value">54m</span>
+      <div class="table-row">
+        <span class="col-main"><span class="icon-green">▶</span> YouTube</span>
+        <span class="col-usage">25m</span>
+        <span class="col-limit pill">30m</span>
+      </div>
+      <div class="table-row exceeded">
+        <span class="col-main"><span class="icon-red">⚠</span> Twitter</span>
+        <span class="col-usage">45m</span>
+        <span class="col-limit pill alert">30m</span>
       </div>
     </div>
   </div>
 
   <div id="screen-limits" class="screen">
-    <header><h1>Settings</h1></header>
+    <header class="limits-header">
+      <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
+      <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
+    </header>
 
-    <div class="card">
-      <div class="card-info">
-        <div class="icon-box">⏳</div>
-        <div>
-          <span class="label-text">Global Daily Limit</span>
-          <span class="sub-text">Currently: <span id="display-global-limit">Loading...</span></span>
-        </div>
+    <div class="center-logo">
+      <div class="logo-circle">🌳</div>
+    </div>
+    <h2 class="page-title">Your Limits</h2>
+
+    <h3 class="section-title-small">Global Settings</h3>
+    <div class="card limit-item">
+      <div class="card-left">
+        <span class="icon-green">⏳</span>
+        <span class="label-text">Daily Screen Limit</span>
       </div>
-      <input type="number" id="global-limit-input" placeholder="Hrs" style="width: 50px; background: #333; border: none; color: white; border-radius: 4px; padding: 5px;">
+      <span class="pill" id="display-global-limit" style="font-weight: bold; color: var(--accent-green);">Loading...</span>
     </div>
 
-    <h3 class="section-title">Manage App Limits</h3>
-    <div id="settings-app-list">
+    <h3 class="section-title-small">Blocked Apps</h3>
+    <div id="blocked-apps-container">
+      <p class="sub-text" style="margin-left: 20px;">Fetching blocked apps...</p>
     </div>
 
-    <div class="card" style="border: 1px dashed var(--accent-green); background: transparent;">
-      <div class="card-info" style="width: 100%;">
-        <input type="text" id="new-app-name" placeholder="App Name" style="flex: 1; background: transparent; border: none; color: white;">
-        <input type="number" id="new-app-time" placeholder="Mins" style="width: 60px; background: #333; border: none; color: white; padding: 5px; margin: 0 10px;">
-        <button onclick="addAppLimit()" style="background: var(--primary-green); border: none; border-radius: 50%; width: 30px; height: 30px; color: white; cursor: pointer;">+</button>
-      </div>
+    <h3 class="section-title-small">Limited Apps</h3>
+    <div id="limited-apps-container">
+      <p class="sub-text" style="margin-left: 20px;">Fetching limited apps...</p>
+    </div>
+
+    <div class="button-container">
+      <button class="edit-limits-btn" onclick="syncLimitFromAirtable()">Sync from Cloud</button>
     </div>
   </div>
 
-  <script>
-    // State management
-    let appLimits = [
-      { name: 'Instagram', time: '2h 10m', icon: '📸' },
-      { name: 'YouTube', time: '1h 45m', icon: '🎬' },
-      { name: 'Roblox', time: '54m', icon: '🎮' }
-    ];
+  <div id="screen-profile" class="screen">
+    <header class="profile-header">
+      <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
+    </header>
 
-    function showScreen(id) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-        if(item.getAttribute('onclick').includes(id)) item.classList.add('active');
-      });
-
-      if(id === 'screen-hub') renderHub();
-      if(id === 'screen-limits') renderSettings();
-    }
-
-    // Update the Home Hub with current data
-    function renderHub() {
-      const list = document.querySelector('.app-list');
-      list.innerHTML = appLimits.map(app => `
-            <div class="card">
-                <div class="card-info">
-                    <div class="icon-box">${app.icon}</div>
-                    <div><span class="label-text">${app.name}</span><span class="sub-text">Active Limit</span></div>
-                </div>
-                <span class="limit-value">${app.time}</span>
-            </div>
-        `).join('');
-    }
-
-    // Update the Settings screen
-    function renderSettings() {
-      const list = document.getElementById('settings-app-list');
-      list.innerHTML = appLimits.map((app, index) => `
-            <div class="card">
-                <div class="card-info">
-                    <span>${app.icon} ${app.name}</span>
-                </div>
-                <button onclick="removeLimit(${index})" style="background: none; border: none; color: var(--danger); cursor: pointer;">Remove</button>
-            </div>
-        `).join('');
-    }
-
-    function addAppLimit() {
-      const nameInput = document.getElementById('new-app-name');
-      const timeInput = document.getElementById('new-app-time');
-
-      if (nameInput.value && timeInput.value) {
-        appLimits.push({
-          name: nameInput.value,
-          time: timeInput.value + 'm',
-          icon: '📱'
-        });
-        nameInput.value = '';
-        timeInput.value = '';
-        renderSettings();
-      }
-    }
-
-    function removeLimit(index) {
-      appLimits.splice(index, 1);
-      renderSettings();
-    }
-
-    // Global limit listener
-    document.getElementById('global-limit-input').addEventListener('change', (e) => {
-      document.getElementById('display-global-limit').innerText = e.target.value + 'h 00m';
-      document.querySelector('#screen-hub h1').innerText = e.target.value + 'h 00m';
-    });
-    const activities = [
-      { label: "Read 10 pages of a book", time: 10 },
-      { label: "Go for a 15m walk", time: 15 },
-      { label: "Meditation / Breathing", time: 5 },
-      { label: "Sketch something for 10m", time: 10 }
-    ];
-
-    function goToIntervention(appName) {
-      document.getElementById('target-app').innerText = appName;
-      const randomActivity = activities[Math.floor(Math.random() * activities.length)];
-      const actBtn = document.getElementById('activity-btn');
-      actBtn.innerText = randomActivity.label;
-      actBtn.dataset.minutes = randomActivity.time;
-
-      // Switch to intervention screen
-      showScreen('screen-intervention');
-      // Hide nav bar so they are "forced" to choose
-      document.querySelector('.bottom-nav').style.display = 'none';
-    }
-
-    function startActivity() {
-      const minutes = document.getElementById('activity-btn').dataset.minutes;
-      document.getElementById('timer-label').innerText = document.getElementById('activity-btn').innerText;
-      document.getElementById('timer-clock').innerText = minutes + ":00";
-
-      showScreen('screen-timer');
-    }
-
-    function goToBlackScreen() {
-      showScreen('screen-black');
-      document.querySelector('.bottom-nav').style.display = 'none';
-    }
-
-    // Wrap the original showScreen to handle the Nav Bar visibility
-    const baseShowScreen = showScreen;
-    showScreen = function(id) {
-      // Show nav bar only on primary screens
-      const primaryScreens = ['screen-hub', 'screen-limits', 'screen-permissions', 'screen-simulation'];
-      document.querySelector('.bottom-nav').style.display = primaryScreens.includes(id) ? 'flex' : 'none';
-
-      baseShowScreen(id);
-    }
-
-
-    // Initial render
-    renderHub();
-  </script>
-
-  <div id="screen-permissions" class="screen">
-    <header><h1>Permissions</h1></header>
-    <div class="card">
-      <div class="card-info">
-        <div class="icon-box">🛡️</div>
-        <div><span class="label-text">System Access</span><span class="sub-text">Required for tracking</span></div>
+    <div class="profile-main">
+      <div class="avatar-container">
+        <div class="avatar-box">👤</div>
       </div>
-      <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-    </div>
-    <div class="card">
-      <div class="card-info">
-        <div class="icon-box">📍</div>
-        <div><span class="label-text">Location</span><span class="sub-text">Usage by region</span></div>
-      </div>
-      <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+      <h2 class="profile-name">Hello, Max!</h2>
+      <p class="profile-subtext">Profile Info</p>
     </div>
   </div>
 
   <nav class="bottom-nav">
-    <div class="nav-item" onclick="showScreen('screen-permissions')"><span class="nav-icon">🛡️</span><span class="nav-label">Security</span></div>
-    <div class="nav-item active" onclick="showScreen('screen-hub')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
-    <div class="nav-item" onclick="showScreen('screen-limits')"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></div>
-    <div class="nav-item" onclick="showScreen('screen-simulation')"><span class="nav-icon">📱</span><span class="nav-label">Sim</span></div>
+    <div class="nav-item active" id="nav-home" onclick="showScreen('screen-home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+    </div>
+
+    <div class="nav-item" id="nav-apps" onclick="showScreen('screen-apps')">
+      <span class="nav-icon">📊</span><span class="nav-label">Apps</span>
+    </div>
+
+    <div class="nav-item" id="nav-limits" onclick="showScreen('screen-limits')">
+      <span class="nav-icon">🔒</span><span class="nav-label">Limits</span>
+    </div>
+
+    <div class="nav-item" id="nav-profile" onclick="showScreen('screen-profile')">
+      <span class="nav-icon">≡</span><span class="nav-label">Settings</span>
+    </div>
   </nav>
-
-  <div id="screen-simulation" class="screen">
-    <header><h1>Phone Mockup</h1></header>
-    <div class="phone-grid">
-      <div class="app-box" onclick="goToIntervention('Instagram')">Instagram</div>
-      <div class="app-box" onclick="goToIntervention('TikTok')">TikTok</div>
-    </div>
-  </div>
-
-  <div id="screen-intervention" class="screen">
-    <div class="intervention-container">
-      <div class="icon-box" style="width: 60px; height: 60px; margin: 0 auto 20px; font-size: 2rem;">⚠️</div>
-      <h2>Hold on!</h2>
-      <p>Are you sure you want to open <span id="target-app" style="color: var(--accent-green);"></span>?</p>
-      <p class="sub-text" style="margin-bottom: 30px;">It looks like you've reached your limit. Why not try this instead:</p>
-
-      <button id="activity-btn" class="btn-primary" style="position: static; transform: none; width: 100%;" onclick="startActivity()">
-        Go for a 15m Walk
-      </button>
-
-      <button class="override-btn" style="margin-top: 40px; border: none; text-decoration: underline;" onclick="goToBlackScreen()">
-        Ignore and open anyway
-      </button>
-    </div>
-  </div>
-
-  <div id="screen-timer" class="screen">
-    <div class="timer-container">
-      <h2 id="timer-label">Walking...</h2>
-      <div class="timer-display" id="timer-clock">15:00</div>
-      <div class="progress-bg" style="width: 80%; margin: 20px auto;">
-        <div class="progress-fill" style="width: 100%; animation: shrink 900s linear forwards;"></div>
-      </div>
-      <button class="override-btn" style="margin-top: 50px;" onclick="goToBlackScreen()">I GIVE UP (OVERRIDE)</button>
-    </div>
-  </div>
-
-  <div id="screen-black" class="screen" style="background: black; z-index: 1000; padding: 0;">
-    <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-      <p style="color: #222;">Instagram Content Loaded...</p>
-
-      <button class="exit-app-btn" onclick="showScreen('screen-simulation')">
-        ✕ Close App
-      </button>
-    </div>
-  </div>
-
 </div>
 
 <script>
   function showScreen(id) {
-    // Hide all screens
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    // Show selected screen
-    document.getElementById(id).classList.add('active');
+    // 1. Hide all screens
+    document.querySelectorAll('.screen').forEach(s => {
+      s.classList.remove('active');
+    });
 
-    // Update nav styling
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    // 2. Show the specific screen requested
+    const target = document.getElementById(id);
+    if (target) {
+      target.classList.add('active');
+    } else {
+      console.error("Screen ID not found:", id);
+    }
+
+    // 3. Update the Nav Bar highlight
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    if (id === 'screen-home') document.getElementById('nav-home').classList.add('active');
+    if (id === 'screen-apps') document.getElementById('nav-apps').classList.add('active');
+    if (id === 'screen-limits') document.getElementById('nav-limits').classList.add('active');
+    if (id === 'screen-profile') document.getElementById('nav-profile').classList.add('active');
   }
 </script>
-<script src="renderer.js"></script>
 
+<script src="renderer.js"></script>
 </body>
 </html>
