@@ -11,7 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "electron": "^40.6.0",
+    "electron": "^40.4.1",
     "git": "^0.1.5"
   }
 }
