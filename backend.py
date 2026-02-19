@@ -2,31 +2,21 @@ import os
 from dotenv import load_dotenv
 from pyairtable import Api
 
-# Load secure tokens
 load_dotenv()
 TOKEN = os.getenv("AIRTABLE_TOKEN")
 BASE_ID = os.getenv("AIRTABLE_BASE_ID")
 TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME")
 
-# Initialize connection
 api = Api(TOKEN)
-table = api.table(BASE_ID, "Apps")
+table = api.table(BASE_ID, "Users")
 
-def print_table_contents():
+def get_limit_value(record_id, field_name):
     try:
-        # Fetch all records
-        records = table.all()
-
-        if not records:
-            print("The table is empty.")
-            return
-        else:
-            print(records)
-
-
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        record = table.get(record_id)
+        print(record['fields'].get(field_name, {}))
+    except Exception:
+        print("6h 00m") # Fallback default
 
 if __name__ == "__main__":
-    print_table_contents()
+    # Example ID
+    get_limit_value("rec1234567890", "TimeLimit")
