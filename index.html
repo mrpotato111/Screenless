@@ -10,247 +10,449 @@
 
 <body>
 
-<div class="mobile-container">
+  <div class="mobile-container">
 
-  <div id="screen-home" class="screen active">
-    <header class="main-header">
-      <div class="logo-box">
+    <div id="screen-home" class="screen active">
+      <header class="main-header">
+        <div class="logo-box">
+          <div class="logo-circle">🌳</div>
+          <span>Screenless</span>
+        </div>
+        <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
+      </header>
+
+      <div class="card progress-card">
+        <div class="progress-header">
+          <div class="level-info">
+            <span class="label-text">Progress</span>
+            <h2 class="level-number">11</h2>
+            <span class="xp-text">Xp: 1487/2000</span>
+          </div>
+          <div class="streak-badge">
+            <span class="sub-text">Days Streak</span>
+            <div class="streak-val">🔥 27</div>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-fill" style="width: 65%;"></div>
+        </div>
+        <span class="next-level-text">533xp until next level</span>
+      </div>
+
+      <div class="card simple-card">
+        <span class="label-text">On Screen Today</span>
+        <span class="time-val"><span class="icon-green">⏱</span> <span id="hub-daily-total">52min</span></span>
+      </div>
+
+      <h3 class="section-title">Today's Plan</h3>
+      <div class="card action-card">
+        <div class="card-left">
+          <span class="icon-green">⚡</span>
+          <span class="label-text">Exercise For 30 Min</span>
+        </div>
+        <div class="toggle-btn add-box" onclick="toggleBtn(this)">+</div>
+      </div>
+      <div class="card action-card">
+        <div class="card-left">
+          <span class="icon-green">📖</span>
+          <span class="label-text">Read For 45 Min</span>
+        </div>
+        <div class="toggle-btn add-box" onclick="toggleBtn(this)">+</div>
+      </div>
+
+      <h3 class="section-title">Reminders</h3>
+      <div class="card action-card">
+        <div class="card-left">
+          <span class="icon-green">📞</span>
+          <div>
+            <span class="label-text">Call Mom</span>
+            <span class="sub-text">Meditate for 10 minutes</span>
+          </div>
+        </div>
+        <div class="toggle-btn add-box" onclick="toggleBtn(this)">+</div>
+      </div>
+    </div>
+
+    <div id="screen-apps" class="screen">
+      <header class="apps-header">
+        <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
         <div class="logo-circle">🌳</div>
-        <span>Screenless</span>
-      </div>
-      <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
-    </header>
+        <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
+      </header>
 
-    <div class="card progress-card">
-      <div class="progress-header">
-        <div class="level-info">
-          <span class="label-text">Progress</span>
-          <h2 class="level-number">11</h2>
-          <span class="xp-text">Xp: 1487/2000</span>
-        </div>
-        <div class="streak-badge">
-          <span class="sub-text">Days Streak</span>
-          <div class="streak-val">🔥 27</div>
-        </div>
-      </div>
-      <div class="progress-bar-container">
-        <div class="progress-fill" style="width: 65%;"></div>
-      </div>
-      <span class="next-level-text">533xp until next level</span>
-    </div>
+      <h2 class="page-title">Apps</h2>
 
-    <div class="card simple-card">
-      <span class="label-text">On Screen Today</span>
-      <span class="time-val"><span class="icon-green">⏱</span> <span id="hub-daily-total">52min</span></span>
-    </div>
-
-    <h3 class="section-title">Today's Plan</h3>
-    <div class="card action-card">
-      <div class="card-left">
-        <span class="icon-green">⚡</span>
-        <span class="label-text">Exercise For 30 Min</span>
-      </div>
-      <div class="check-box checked">✓</div>
-    </div>
-    <div class="card action-card">
-      <div class="card-left">
-        <span class="icon-green">📖</span>
-        <span class="label-text">Read For 45 Min</span>
-      </div>
-      <div class="add-box">+</div>
-    </div>
-
-    <h3 class="section-title">Reminders</h3>
-    <div class="card action-card">
-      <div class="card-left">
-        <span class="icon-green">📞</span>
-        <div>
-          <span class="label-text">Call Mom</span>
-          <span class="sub-text">Meditate for 10 minutes</span>
+      <div class="chart-section">
+        <div class="y-axis">
+          <span>12h</span><span>9h</span><span>6h</span><span>3h</span><span>0h</span>
         </div>
-      </div>
-      <div class="add-box">+</div>
-    </div>
-  </div>
-
-  <div id="screen-apps" class="screen">
-    <header class="apps-header">
-      <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
-      <div class="logo-circle">🌳</div>
-      <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
-    </header>
-
-    <h2 class="page-title">Apps</h2>
-
-    <div class="chart-section">
-      <div class="y-axis">
-        <span>12h</span><span>9h</span><span>6h</span><span>3h</span><span>0h</span>
-      </div>
-      <div class="bars-container">
-        <div class="bar-wrapper">
-          <div class="bar-thin" style="height: 60%;"></div><span>M</span>
-        </div>
-        <div class="bar-wrapper">
-          <div class="bar-thin" style="height: 30%;"></div><span>T</span>
-        </div>
-        <div class="bar-wrapper">
-          <div class="bar-thin" style="height: 85%;"></div><span>W</span>
-        </div>
-        <div class="bar-wrapper">
-          <div class="bar-thin" style="height: 40%;"></div><span>T</span>
-        </div>
-        <div class="bar-wrapper">
-          <div class="bar-thin" style="height: 70%;"></div><span>F</span>
-        </div>
-        <div class="bar-wrapper">
-          <div class="bar-thin" style="height: 50%;"></div><span>S</span>
-        </div>
-        <div class="bar-wrapper">
-          <div class="bar-thin" style="height: 30%;"></div><span>S</span>
-        </div>
-      </div>
-    </div>
-
-    <h3 class="section-title">Screen Time Last Week</h3>
-    <div class="card stats-card">
-      <div class="stats-container">
-        <div class="stats-main">
-          <span class="total-label">TOTAL</span>
-          <h2 class="total-time">45h 21m</h2>
-        </div>
-        <div class="stats-details">
-          <div class="stats-item">
-            <span class="dot apps"></span>
-            <span class="label">Apps</span>
-            <span class="val">28h 15m</span>
+        <div class="bars-container">
+          <div class="bar-wrapper">
+            <div class="bar-thin" style="height: 60%;"></div><span>M</span>
           </div>
-          <div class="stats-item">
-            <span class="dot web"></span>
-            <span class="label">Web</span>
-            <span class="val">12h 40m</span>
+          <div class="bar-wrapper">
+            <div class="bar-thin" style="height: 30%;"></div><span>T</span>
           </div>
-          <div class="stats-item">
-            <span class="dot other"></span>
-            <span class="label">Other</span>
-            <span class="val">4h 26m</span>
+          <div class="bar-wrapper">
+            <div class="bar-thin" style="height: 85%;"></div><span>W</span>
+          </div>
+          <div class="bar-wrapper">
+            <div class="bar-thin" style="height: 40%;"></div><span>T</span>
+          </div>
+          <div class="bar-wrapper">
+            <div class="bar-thin" style="height: 70%;"></div><span>F</span>
+          </div>
+          <div class="bar-wrapper">
+            <div class="bar-thin" style="height: 50%;"></div><span>S</span>
+          </div>
+          <div class="bar-wrapper">
+            <div class="bar-thin" style="height: 30%;"></div><span>S</span>
           </div>
         </div>
       </div>
+
+      <h3 class="section-title">Screen Time Last Week</h3>
+      <div class="card stats-card">
+        <div class="stats-container">
+          <div class="stats-main">
+            <span class="total-label">TOTAL</span>
+            <h2 class="total-time">45h 21m</h2>
+          </div>
+          <div class="stats-details">
+            <div class="stats-item">
+              <span class="dot apps"></span>
+              <span class="label">Apps</span>
+              <span class="val">28h 15m</span>
+            </div>
+            <div class="stats-item">
+              <span class="dot web"></span>
+              <span class="label">Web</span>
+              <span class="val">12h 40m</span>
+            </div>
+            <div class="stats-item">
+              <span class="dot other"></span>
+              <span class="label">Other</span>
+              <span class="val">4h 26m</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-title">Daily Overview</h3>
+      <div class="card integrated-table">
+        <div class="table-header">
+          <span class="col-main">App</span>
+          <span class="col-usage">Usage</span>
+          <span class="col-limit">Limit</span>
+        </div>
+        <div class="table-row">
+          <span class="col-main">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png" class="app-row-img"
+              alt="YT">
+            YouTube
+          </span>
+          <span class="col-usage">25m</span>
+          <span class="col-limit pill">30m</span>
+        </div>
+        <div class="table-row exceeded">
+          <span class="col-main">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/X_logo_2023.svg"
+              class="app-row-img white-filter" alt="X">
+            Twitter
+          </span>
+          <span class="col-usage">45m</span>
+          <span class="col-limit pill alert">30m</span>
+        </div>
+      </div>
     </div>
 
-    <h3 class="section-title">Daily Overview</h3>
-    <div class="card integrated-table">
-      <div class="table-header">
-        <span class="col-main">App</span>
-        <span class="col-usage">Usage</span>
-        <span class="col-limit">Limit</span>
+    <div id="screen-limits" class="screen">
+      <header class="limits-header">
+        <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
+        <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
+      </header>
+
+      <div class="center-logo" style="text-align: center;">
+        <div class="logo-circle" style="margin: 0 auto;">🌳</div>
       </div>
-      <div class="table-row">
-        <span class="col-main"><span class="icon-green">▶</span> YouTube</span>
-        <span class="col-usage">25m</span>
-        <span class="col-limit pill">30m</span>
+      <h2 class="page-title">Your Limits</h2>
+
+      <h3 class="section-title-small" style="margin: 20px 20px 10px; font-size: 0.9rem; color: var(--text-dim);">Global
+        Settings</h3>
+
+      <div class="card limit-item clickable-card" onclick="showScreen('screen-daily-settings')">
+        <div class="card-left">
+          <span class="icon-green">⏳</span>
+          <span class="label-text">Daily Screen Limit</span>
+        </div>
+        <div class="card-right" style="display: flex; align-items: center; gap: 10px;">
+          <span class="pill" id="display-global-limit-main" style="font-weight: bold; color: var(--accent-green);">2h
+            00m</span>
+          <span class="icon-green">〉</span>
+        </div>
       </div>
-      <div class="table-row exceeded">
-        <span class="col-main"><span class="icon-red">⚠</span> Twitter</span>
-        <span class="col-usage">45m</span>
-        <span class="col-limit pill alert">30m</span>
+
+      <h3 class="section-title-small" style="margin: 20px 20px 10px; font-size: 0.9rem; color: var(--text-dim);">Blocked
+        Apps</h3>
+      <div id="blocked-apps-container">
+        <div class="card clickable-card" onclick="showScreen('screen-blocked-list')">
+          <div class="card-left">
+            <span class="label-text">Manage Blocked Apps</span>
+          </div>
+          <span class="icon-green">〉</span>
+        </div>
+      </div>
+
+      <h3 class="section-title-small" style="margin: 20px 20px 10px; font-size: 0.9rem; color: var(--text-dim);">Limited
+        Apps</h3>
+      <div id="limited-apps-container">
+        <div class="card clickable-card" onclick="showScreen('screen-limited-list')">
+          <div class="card-left">
+            <span class="label-text">Set App Time Limits</span>
+          </div>
+          <span class="icon-green">〉</span>
+        </div>
+      </div>
+
+      <div class="button-container" style="text-align: center; margin-top: 20px;">
+        <button class="edit-limits-btn" onclick="syncLimitFromAirtable()"
+          style="background: none; border: 1px solid var(--accent-green); color: var(--accent-green); padding: 10px 25px; border-radius: 20px; cursor: pointer;">Sync
+          from Cloud</button>
       </div>
     </div>
+
+    <div id="screen-blocked-list" class="screen">
+      <header class="limits-header">
+        <span class="back-arrow" onclick="showScreen('screen-limits')">〈</span>
+        <span style="font-weight: 600;">Blocked Apps</span>
+        <div style="width: 24px;"></div>
+      </header>
+      <div style="padding: 10px 0;">
+        <div class="card action-card">
+          <div class="card-left">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="app-row-img"
+              alt="IG">
+            <span class="label-text">Instagram</span>
+          </div>
+          <button class="block-toggle" onclick="this.classList.toggle('active')">Block</button>
+        </div>
+        <div class="card action-card">
+          <div class="card-left">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/X_logo_2023.svg"
+              class="app-row-img white-filter" alt="X">
+            <span class="label-text">Twitter</span>
+          </div>
+          <button class="block-toggle active" onclick="this.classList.toggle('active')">Block</button>
+        </div>
+        <div class="card action-card">
+          <div class="card-left">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png"
+              class="app-row-img" alt="FB">
+            <span class="label-text">Facebook</span>
+          </div>
+          <button class="block-toggle" onclick="this.classList.toggle('active')">Block</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-limited-list" class="screen">
+      <header class="limits-header">
+        <span class="back-arrow" onclick="showScreen('screen-limits')">〈</span>
+        <span style="font-weight: 600;">Limited Apps</span>
+        <div style="width: 24px;"></div>
+      </header>
+      <div style="padding: 10px 0;">
+        <div class="card action-card">
+          <div class="card-left">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png" class="app-row-img"
+              alt="YT">
+            <span class="label-text">YouTube</span>
+          </div>
+          <input type="text" class="small-time-input" value="30m">
+        </div>
+        <div class="card action-card">
+          <div class="card-left">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Slack_icon_2019.svg/2048px-Slack_icon_2019.svg.png"
+              class="app-row-img" alt="SL">
+            <span class="label-text">Slack</span>
+          </div>
+          <input type="text" class="small-time-input" value="1h 15m">
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-daily-settings" class="screen">
+      <header class="limits-header">
+        <span class="back-arrow" onclick="showScreen('screen-limits')">〈</span>
+        <span style="font-weight: 600;">Daily Limit</span>
+        <div style="width: 24px;"></div>
+      </header>
+
+      <div style="padding: 20px; text-align: center;">
+        <div class="icon-green" style="font-size: 3.5rem; margin-bottom: 20px;">⏳</div>
+        <h2 class="page-title">Screen Time Goal</h2>
+        <p style="color: var(--text-dim); margin-bottom: 30px; font-size: 0.9rem;">Set a daily limit to stay productive
+          and mindful of your digital wellbeing.</p>
+
+        <div class="card" style="justify-content: space-between; padding: 25px;">
+          <span style="font-size: 1.1rem; font-weight: 500;">Time Limit</span>
+          <input type="text" id="limit-input" value="2h 00m"
+            style="background: none; border: 1px solid var(--border-color); color: var(--accent-green); font-weight: bold; font-size: 1.2rem; text-align: center; width: 100px; border-radius: 8px;">
+        </div>
+
+        <div style="margin-top: 40px;">
+          <button onclick="applyLimit()"
+            style="width: 100%; background: var(--accent-green); color: #000; border: none; padding: 16px; border-radius: 15px; font-weight: bold; font-size: 1rem; cursor: pointer;">Apply
+            New Limit</button>
+          <p id="apply-success" style="color: var(--accent-green); font-size: 0.8rem; margin-top: 10px; display: none;">
+            Limit applied successfully!</p>
+          <p style="color: var(--text-dim); font-size: 0.75rem; margin-top: 15px;">This limit applies to all tracked
+            applications.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-profile" class="screen">
+      <header class="profile-header">
+        <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
+      </header>
+
+      <div class="profile-main">
+        <div class="avatar-container-new">
+          <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=150&auto=format&fit=crop"
+            alt="Max" class="profile-img">
+        </div>
+        <h2 class="profile-name">Hello, Max!</h2>
+        <p class="profile-subtext">Profile Info</p>
+      </div>
+
+      <div class="card profile-card-new">
+        <p class="card-inner-title">Most Used Apps</p>
+        <div class="apps-grid-new">
+          <div class="app-item">
+            <div class="app-icon-outline">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="IG"
+                class="grid-app-img">
+            </div>
+            <span class="app-label">Instagram</span>
+          </div>
+          <div class="app-item">
+            <div class="app-icon-outline">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg"
+                alt="YT" class="grid-app-img">
+            </div>
+            <span class="app-label">YouTube</span>
+          </div>
+          <div class="app-item">
+            <div class="app-icon-outline">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/X_logo_2023.svg" alt="X"
+                class="grid-app-img white-filter">
+            </div>
+            <span class="app-label">Twitter</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card profile-card-new">
+        <p class="card-inner-title">Daily Average: 3h 20m</p>
+        <div class="mini-chart">
+          <div class="mini-bar" style="height: 40%;"><span>Mon</span></div>
+          <div class="mini-bar-active" style="height: 80%;"><span>Tue</span></div>
+          <div class="mini-bar" style="height: 30%;"><span>Wed</span></div>
+          <div class="mini-bar-active" style="height: 70%;"><span>Thu</span></div>
+          <div class="mini-bar" style="height: 50%;"><span>Fri</span></div>
+          <div class="mini-bar-active" style="height: 75%;"><span>Sat</span></div>
+          <div class="mini-bar" style="height: 45%;"><span>Sun</span></div>
+        </div>
+      </div>
+
+      <div class="dropdown-wrapper">
+        <div class="card action-card" onclick="toggleDropdown('perm-content')">
+          <span class="label-text">Permissions</span>
+          <span class="icon-green">〉</span>
+        </div>
+        <div id="perm-content" class="dropdown-content">
+          <div class="dropdown-item">Camera Access <span class="icon-green">On</span></div>
+          <div class="dropdown-item">Location Services <span class="icon-green">Off</span></div>
+          <div class="dropdown-item">Notifications <span class="icon-green">On</span></div>
+        </div>
+      </div>
+
+      <div class="dropdown-wrapper">
+        <div class="card action-card" onclick="toggleDropdown('act-content')">
+          <span class="label-text">Activities</span>
+          <span class="icon-green">〉</span>
+        </div>
+        <div id="act-content" class="dropdown-content">
+          <div class="dropdown-item">Exercise Log</div>
+          <div class="dropdown-item">Reading History</div>
+          <div class="dropdown-item">Meditation Sessions</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <div class="nav-item active" id="nav-home" onclick="showScreen('screen-home')">
+        <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item" id="nav-apps" onclick="showScreen('screen-apps')">
+        <span class="nav-icon">📊</span><span class="nav-label">Apps</span>
+      </div>
+      <div class="nav-item" id="nav-limits" onclick="showScreen('screen-limits')">
+        <span class="nav-icon">🔒</span><span class="nav-label">Limits</span>
+      </div>
+      <div class="nav-item" id="nav-profile" onclick="showScreen('screen-profile')">
+        <span class="nav-icon">≡</span><span class="nav-label">Settings</span>
+      </div>
+    </nav>
   </div>
 
-  <div id="screen-limits" class="screen">
-    <header class="limits-header">
-      <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
-      <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
-    </header>
+  <script>
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(id);
+      if (target) target.classList.add('active');
 
-    <div class="center-logo">
-      <div class="logo-circle">🌳</div>
-    </div>
-    <h2 class="page-title">Your Limits</h2>
-
-    <h3 class="section-title-small">Global Settings</h3>
-    <div class="card limit-item">
-      <div class="card-left">
-        <span class="icon-green">⏳</span>
-        <span class="label-text">Daily Screen Limit</span>
-      </div>
-      <span class="pill" id="display-global-limit" style="font-weight: bold; color: var(--accent-green);">Loading...</span>
-    </div>
-
-    <h3 class="section-title-small">Blocked Apps</h3>
-    <div id="blocked-apps-container">
-      <p class="sub-text" style="margin-left: 20px;">Fetching blocked apps...</p>
-    </div>
-
-    <h3 class="section-title-small">Limited Apps</h3>
-    <div id="limited-apps-container">
-      <p class="sub-text" style="margin-left: 20px;">Fetching limited apps...</p>
-    </div>
-
-    <div class="button-container">
-      <button class="edit-limits-btn" onclick="syncLimitFromAirtable()">Sync from Cloud</button>
-    </div>
-  </div>
-
-  <div id="screen-profile" class="screen">
-    <header class="profile-header">
-      <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
-    </header>
-
-    <div class="profile-main">
-      <div class="avatar-container">
-        <div class="avatar-box">👤</div>
-      </div>
-      <h2 class="profile-name">Hello, Max!</h2>
-      <p class="profile-subtext">Profile Info</p>
-    </div>
-  </div>
-
-  <nav class="bottom-nav">
-    <div class="nav-item active" id="nav-home" onclick="showScreen('screen-home')">
-      <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
-    </div>
-
-    <div class="nav-item" id="nav-apps" onclick="showScreen('screen-apps')">
-      <span class="nav-icon">📊</span><span class="nav-label">Apps</span>
-    </div>
-
-    <div class="nav-item" id="nav-limits" onclick="showScreen('screen-limits')">
-      <span class="nav-icon">🔒</span><span class="nav-label">Limits</span>
-    </div>
-
-    <div class="nav-item" id="nav-profile" onclick="showScreen('screen-profile')">
-      <span class="nav-icon">≡</span><span class="nav-label">Settings</span>
-    </div>
-  </nav>
-</div>
-
-<script>
-  function showScreen(id) {
-    // 1. Hide all screens
-    document.querySelectorAll('.screen').forEach(s => {
-      s.classList.remove('active');
-    });
-
-    // 2. Show the specific screen requested
-    const target = document.getElementById(id);
-    if (target) {
-      target.classList.add('active');
-    } else {
-      console.error("Screen ID not found:", id);
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      if (id === 'screen-home') document.getElementById('nav-home').classList.add('active');
+      if (id === 'screen-apps') document.getElementById('nav-apps').classList.add('active');
+      if (['screen-limits', 'screen-daily-settings', 'screen-blocked-list', 'screen-limited-list'].includes(id)) {
+        document.getElementById('nav-limits').classList.add('active');
+      }
+      if (id === 'screen-profile') document.getElementById('nav-profile').classList.add('active');
     }
 
-    // 3. Update the Nav Bar highlight
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    function toggleBtn(element) {
+      if (element.innerHTML === '+') {
+        element.innerHTML = '✓';
+        element.style.backgroundColor = 'var(--accent-green)';
+        element.style.color = '#000';
+      } else {
+        element.innerHTML = '+';
+        element.style.backgroundColor = '#30363d';
+        element.style.color = 'inherit';
+      }
+    }
 
-    if (id === 'screen-home') document.getElementById('nav-home').classList.add('active');
-    if (id === 'screen-apps') document.getElementById('nav-apps').classList.add('active');
-    if (id === 'screen-limits') document.getElementById('nav-limits').classList.add('active');
-    if (id === 'screen-profile') document.getElementById('nav-profile').classList.add('active');
-  }
-</script>
+    function toggleDropdown(id) {
+      const content = document.getElementById(id);
+      const isOpen = content.style.display === 'block';
+      document.querySelectorAll('.dropdown-content').forEach(d => d.style.display = 'none');
+      content.style.display = isOpen ? 'none' : 'block';
+    }
 
-<script src="renderer.js"></script>
+    function applyLimit() {
+      const val = document.getElementById('limit-input').value;
+      document.getElementById('display-global-limit-main').innerText = val;
+      const successMsg = document.getElementById('apply-success');
+      successMsg.style.display = 'block';
+      setTimeout(() => {
+        successMsg.style.display = 'none';
+        showScreen('screen-limits');
+      }, 1500);
+    }
+  </script>
 </body>
+
 </html>

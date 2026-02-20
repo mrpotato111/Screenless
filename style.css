@@ -109,60 +109,12 @@ header {
     justify-content: space-between;
 }
 
-.simple-card {
-    display: flex;
-    justify-content: space-between;
+.clickable-card:active {
+    background-color: #252b33;
+    transform: scale(0.98);
 }
 
-/* Progress Card */
-.progress-card {
-    display: block;
-}
-
-.progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-.level-number {
-    font-size: 2.5rem;
-    margin: 5px 0;
-}
-
-.streak-badge {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 8px 12px;
-    border-radius: 12px;
-    text-align: center;
-}
-
-.streak-val {
-    color: var(--accent-green);
-    font-weight: bold;
-    font-size: 1.1rem;
-}
-
-.progress-bar-container {
-    height: 10px;
-    background: #30363d;
-    border-radius: 10px;
-    margin: 15px 0 8px;
-}
-
-.progress-fill {
-    height: 100%;
-    background: var(--accent-green);
-    border-radius: 10px;
-    box-shadow: 0 0 10px var(--accent-green);
-}
-
-.next-level-text {
-    font-size: 0.75rem;
-    color: var(--accent-green);
-}
-
-/* --- UUS STATS-CARD DISAIN --- */
+/* Stats Card */
 .stats-card {
     display: block;
     padding: 24px;
@@ -234,9 +186,90 @@ header {
     font-weight: 600;
 }
 
-/* --- STATS LÕPP --- */
+/* Dropdown Styles */
+.dropdown-content {
+    display: none;
+    background: #161b22;
+    margin: -5px 20px 15px;
+    border-radius: 0 0 15px 15px;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    padding: 10px;
+}
 
-/* Table Styles */
+.dropdown-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #2d333b;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-dim);
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+/* Image styles */
+.app-row-img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    object-fit: contain;
+}
+
+.grid-app-img {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+.white-filter {
+    filter: brightness(0) invert(1);
+}
+
+/* Progress Card */
+.progress-card {
+    display: block;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.level-number {
+    font-size: 2.5rem;
+    margin: 5px 0;
+}
+
+.streak-badge {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.streak-val {
+    color: var(--accent-green);
+    font-weight: bold;
+}
+
+.progress-bar-container {
+    height: 10px;
+    background: #30363d;
+    border-radius: 10px;
+    margin: 15px 0 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent-green);
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--accent-green);
+}
+
+/* Integrated Table */
 .integrated-table {
     display: block;
     padding: 0;
@@ -250,7 +283,6 @@ header {
     border-bottom: 1px solid var(--border-color);
     font-size: 0.75rem;
     color: var(--text-dim);
-    font-weight: bold;
 }
 
 .table-row {
@@ -274,15 +306,6 @@ header {
 .col-limit {
     flex: 1;
     text-align: right;
-}
-
-.pill {
-    color: var(--text-dim);
-}
-
-.pill.alert {
-    color: var(--danger-red);
-    font-weight: bold;
 }
 
 .table-row.exceeded {
@@ -334,38 +357,27 @@ header {
     margin-top: 5px;
 }
 
-/* Profile & Limits Specifics */
-.avatar-container {
-    width: 140px;
-    height: 140px;
-    margin: 20px auto;
-    border: 4px solid #1e88e5;
-    border-radius: 50px;
-    background: #2d333b;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* Profile/Settings UI */
+.avatar-container-new {
+    width: 180px;
+    height: 130px;
+    margin: 10px auto;
+    background: #e5c7a3;
+    border-radius: 60px;
+    overflow: hidden;
 }
 
-.avatar-box {
-    font-size: 4rem;
+.profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .profile-main {
     text-align: center;
-    margin-bottom: 20px;
 }
 
-.profile-name {
-    font-family: serif;
-    font-size: 1.8rem;
-}
-
-.profile-subtext {
-    color: var(--text-dim);
-}
-
-.profile-card {
+.profile-card-new {
     display: block;
 }
 
@@ -375,56 +387,58 @@ header {
     margin-bottom: 15px;
 }
 
-.apps-grid {
+.apps-grid-new {
     display: flex;
     justify-content: space-around;
-    text-align: center;
 }
 
-.app-icon {
-    font-size: 2rem;
-    display: block;
+.app-icon-outline {
+    border: 2px solid var(--accent-green);
+    width: 55px;
+    height: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    margin-bottom: 8px;
 }
 
-.app-label {
-    font-size: 0.7rem;
-    color: var(--text-dim);
+.mini-chart {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 80px;
+    padding-bottom: 20px;
 }
 
-.edit-limits-btn {
+.mini-bar,
+.mini-bar-active {
+    width: 20px;
+    border-radius: 5px;
+    position: relative;
+}
+
+.mini-bar {
+    background: #2d333b;
+}
+
+.mini-bar-active {
+    background: var(--accent-green);
+}
+
+.mini-chart span {
+    position: absolute;
+    bottom: -22px;
     width: 100%;
-    padding: 15px;
-    background: transparent;
-    border: 1px solid var(--accent-green);
-    border-radius: 12px;
-    color: white;
-    cursor: pointer;
-}
-
-.button-container {
-    padding: 30px 20px;
+    text-align: center;
+    font-size: 0.6rem;
+    color: var(--text-dim);
 }
 
 /* Helpers */
 .icon-green {
     color: var(--accent-green);
     margin-right: 8px;
-}
-
-.icon-red {
-    color: var(--danger-red);
-    margin-right: 8px;
-}
-
-.check-box {
-    width: 26px;
-    height: 26px;
-    border: 2px solid var(--accent-green);
-    border-radius: 8px;
-    color: var(--accent-green);
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .add-box {
@@ -435,6 +449,7 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .card-left {
@@ -454,6 +469,7 @@ header {
     align-items: center;
     border-top: 1px solid var(--border-color);
     padding-bottom: 15px;
+    z-index: 100;
 }
 
 .nav-item {
@@ -469,13 +485,37 @@ header {
 .nav-icon {
     display: block;
     font-size: 1.4rem;
-    margin-bottom: 4px;
 }
 
 .nav-label {
     font-size: 0.7rem;
 }
-.card-left img {
-    object-fit: cover;
-    background: #2d333b; /* Fallback background */
+
+/* NEW ELEMENTS FOR REQUEST */
+.block-toggle {
+    background: transparent;
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+    padding: 6px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: 0.2s;
+}
+
+.block-toggle.active {
+    background: var(--danger-red);
+    border-color: var(--danger-red);
+    color: white;
+}
+
+.small-time-input {
+    background: #30363d;
+    border: 1px solid var(--border-color);
+    color: var(--accent-green);
+    border-radius: 8px;
+    width: 70px;
+    padding: 6px;
+    text-align: center;
+    font-weight: bold;
 }
