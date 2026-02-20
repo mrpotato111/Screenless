@@ -45,7 +45,6 @@ body {
     display: block;
 }
 
-/* Header & Titles */
 header {
     padding: 30px 24px 15px;
     display: flex;
@@ -81,12 +80,10 @@ header {
 .section-title {
     margin: 25px 20px 10px;
     font-size: 1.3rem;
-    font-family: serif;
 }
 
 .page-title {
     text-align: center;
-    font-family: serif;
     font-size: 1.8rem;
     margin: 10px 0;
 }
@@ -97,7 +94,6 @@ header {
     cursor: pointer;
 }
 
-/* Cards General */
 .card {
     background: var(--card-bg);
     border-radius: 20px;
@@ -109,12 +105,40 @@ header {
     justify-content: space-between;
 }
 
+.dropdown-card {
+    display: block;
+    padding: 0;
+}
+
+.dropdown-summary {
+    list-style: none;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.dropdown-summary::-webkit-details-marker {
+    display: none;
+}
+
+.dropdown-content {
+    padding: 0 20px 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 0.85rem;
+}
+
 .clickable-card:active {
     background-color: #252b33;
     transform: scale(0.98);
 }
 
-/* Stats Card */
 .stats-card {
     display: block;
     padding: 24px;
@@ -186,49 +210,6 @@ header {
     font-weight: 600;
 }
 
-/* Dropdown Styles */
-.dropdown-content {
-    display: none;
-    background: #161b22;
-    margin: -5px 20px 15px;
-    border-radius: 0 0 15px 15px;
-    border: 1px solid var(--border-color);
-    border-top: none;
-    padding: 10px;
-}
-
-.dropdown-item {
-    padding: 12px 15px;
-    border-bottom: 1px solid #2d333b;
-    font-size: 0.85rem;
-    display: flex;
-    justify-content: space-between;
-    color: var(--text-dim);
-}
-
-.dropdown-item:last-child {
-    border-bottom: none;
-}
-
-/* Image styles */
-.app-row-img {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-    object-fit: contain;
-}
-
-.grid-app-img {
-    width: 35px;
-    height: 35px;
-    object-fit: contain;
-}
-
-.white-filter {
-    filter: brightness(0) invert(1);
-}
-
-/* Progress Card */
 .progress-card {
     display: block;
 }
@@ -253,6 +234,7 @@ header {
 .streak-val {
     color: var(--accent-green);
     font-weight: bold;
+    font-size: 1.1rem;
 }
 
 .progress-bar-container {
@@ -269,7 +251,11 @@ header {
     box-shadow: 0 0 10px var(--accent-green);
 }
 
-/* Integrated Table */
+.next-level-text {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
 .integrated-table {
     display: block;
     padding: 0;
@@ -283,6 +269,7 @@ header {
     border-bottom: 1px solid var(--border-color);
     font-size: 0.75rem;
     color: var(--text-dim);
+    font-weight: bold;
 }
 
 .table-row {
@@ -290,6 +277,10 @@ header {
     align-items: center;
     padding: 15px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.table-row.exceeded {
+    background: rgba(255, 82, 82, 0.05);
 }
 
 .col-main {
@@ -308,11 +299,18 @@ header {
     text-align: right;
 }
 
-.table-row.exceeded {
-    background: rgba(255, 82, 82, 0.05);
+.pill {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
 }
 
-/* Chart Styles */
+.pill.alert {
+    color: var(--danger-red);
+    font-weight: bold;
+}
+
 .chart-section {
     display: flex;
     height: 180px;
@@ -357,14 +355,13 @@ header {
     margin-top: 5px;
 }
 
-/* Profile/Settings UI */
 .avatar-container-new {
-    width: 180px;
-    height: 130px;
-    margin: 10px auto;
-    background: #e5c7a3;
-    border-radius: 60px;
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+    border-radius: 40px;
     overflow: hidden;
+    border: 3px solid var(--accent-green);
 }
 
 .profile-img {
@@ -375,21 +372,27 @@ header {
 
 .profile-main {
     text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-name {
+    font-size: 1.5rem;
+    margin-top: 10px;
+}
+
+.profile-subtext {
+    color: var(--text-dim);
+    font-size: 0.9rem;
 }
 
 .profile-card-new {
     display: block;
 }
 
-.card-inner-title {
-    font-size: 0.9rem;
-    color: var(--text-dim);
-    margin-bottom: 15px;
-}
-
 .apps-grid-new {
     display: flex;
     justify-content: space-around;
+    margin-top: 10px;
 }
 
 .app-icon-outline {
@@ -403,39 +406,30 @@ header {
     margin-bottom: 8px;
 }
 
-.mini-chart {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    height: 80px;
-    padding-bottom: 20px;
-}
-
-.mini-bar,
-.mini-bar-active {
-    width: 20px;
-    border-radius: 5px;
-    position: relative;
-}
-
-.mini-bar {
-    background: #2d333b;
-}
-
-.mini-bar-active {
-    background: var(--accent-green);
-}
-
-.mini-chart span {
-    position: absolute;
-    bottom: -22px;
-    width: 100%;
-    text-align: center;
-    font-size: 0.6rem;
+.app-label {
+    font-size: 0.7rem;
     color: var(--text-dim);
+    text-align: center;
+    display: block;
 }
 
-/* Helpers */
+.app-row-img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    object-fit: contain;
+}
+
+.grid-app-img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.white-filter {
+    filter: brightness(0) invert(1);
+}
+
 .icon-green {
     color: var(--accent-green);
     margin-right: 8px;
@@ -450,6 +444,7 @@ header {
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    transition: 0.2s;
 }
 
 .card-left {
@@ -457,7 +452,6 @@ header {
     align-items: center;
 }
 
-/* Bottom Nav */
 .bottom-nav {
     position: absolute;
     bottom: 0;
@@ -491,7 +485,7 @@ header {
     font-size: 0.7rem;
 }
 
-/* NEW ELEMENTS FOR REQUEST */
+/* BLOCKED APPS NUPUD */
 .block-toggle {
     background: transparent;
     border: 1px solid var(--accent-green);
@@ -499,8 +493,9 @@ header {
     padding: 6px 14px;
     border-radius: 12px;
     cursor: pointer;
-    font-size: 0.8rem;
-    transition: 0.2s;
+    font-weight: 600;
+    min-width: 80px;
+    transition: all 0.2s;
 }
 
 .block-toggle.active {
@@ -509,13 +504,8 @@ header {
     color: white;
 }
 
-.small-time-input {
-    background: #30363d;
-    border: 1px solid var(--border-color);
-    color: var(--accent-green);
-    border-radius: 8px;
-    width: 70px;
-    padding: 6px;
-    text-align: center;
-    font-weight: bold;
+.section-title-small {
+    margin: 20px 20px 10px;
+    font-size: 0.9rem;
+    color: var(--text-dim);
 }
