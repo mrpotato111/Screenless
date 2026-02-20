@@ -11,7 +11,6 @@ main_table = api.table(os.getenv("AIRTABLE_BASE_ID"), os.getenv("AIRTABLE_TABLE_
 apps_table = api.table(os.getenv("AIRTABLE_BASE_ID"), "Apps") # Change "Apps" to your actual app list table name
 
 def get_app_info(id_list):
-    """Takes a list of record IDs and returns list of dicts with name and logo."""
     if not id_list or not isinstance(id_list, list):
         return []
 
@@ -21,18 +20,28 @@ def get_app_info(id_list):
             app_record = apps_table.get(record_id)
             fields = app_record.get('fields', {})
 
-            # 1. Get the Name
-            name = fields.get('Name', {})
+            # --- THE FIX IS HERE ---
+            raw_name = fields.get('Apps', 'Unknown')
 
-            # 2. Get the Logo URL (Assuming field name is 'Logo')
+            # If Airtable returns the name inside a list (e.g., ['Instagram'])
+            # we take the first item. If it's already a string, we just use it.
+            if isinstance(raw_name, list):
+                clean_name = str(raw_name[0]) if raw_name else "Unknown"
+            else:
+                clean_name = str(raw_name)
+
+            # Get Logo
             logo_attachments = fields.get('Logo', [])
             logo_url = ""
             if logo_attachments and isinstance(logo_attachments, list):
-                # Get the 'url' from the first attachment
                 logo_url = logo_attachments[0].get('url', "")
 
-            apps_info.append({"name": name, "logo": logo_url})
-        except:
+            apps_info.append({
+                "name": clean_name,
+                "logo": logo_url
+            })
+        except Exception as e:
+            print(f"Error fetching app {record_id}: {e}")
             continue
     return apps_info
 
