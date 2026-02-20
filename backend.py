@@ -58,8 +58,10 @@ def get_sync_data(record_id):
         data = {
             # Use .get with a default string to avoid 'undefined'
             "daily_limit": str(fields.get('Screen_time_limit', {})),
-            "blocked_apps": blocked_info, # This is now a LIST of DICTS
-            "limited_apps": limited_info  # This is now a LIST of DICTS
+            "weekly_total": str(fields.get('Screentime_this_week', '0h 00m')),
+            "today_time": str(fields.get('Screentime_today', {})),
+            "blocked_apps": blocked_info,
+            "limited_apps": limited_info
         }
 
         print(json.dumps(data))

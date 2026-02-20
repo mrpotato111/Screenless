@@ -5,25 +5,29 @@ function syncLimitFromAirtable() {
     const scriptPath = path.join(__dirname, 'backend.py');
 
     exec(`python "${scriptPath}"`, (error, stdout, stderr) => {
-        if (error || stderr) {
-            console.error("Sync Error:", error || stderr);
-            return;
-        }
+        if (error || stderr) return;
 
         try {
             const data = JSON.parse(stdout);
-            console.log("Data received:", data);
 
-            // 1. Update Daily Limit - String(data.daily_limit) prevents 'undefined'
-            const limitEl = document.getElementById('display-global-limit');
-            if (limitEl) {
-                limitEl.innerText = data.daily_limit || "0h 00m";
+            const todayEl = document.getElementById('hub-daily-total-display');
+            if (todayEl) {
+                todayEl.innerText = data.today_time;
             }
 
-            // 2. Build Blocked Apps (passing the array directly)
-            buildList('blocked-apps-container', data.blocked_apps, '🚫');
+            // 1. Update Daily Limit (Home/Limits screens)
+            const limitEl = document.getElementById('display-global-limit');
+            if (limitEl) limitEl.innerText = data.daily_limit;
 
-            // 3. Build Limited Apps
+            // 2. Update Weekly Total (Apps screen) - NEW LOGIC
+            const weeklyEl = document.getElementById('weekly-total-display');
+            if (weeklyEl) {
+                weeklyEl.innerText = data.weekly_total || "0h 00m";
+            }
+
+
+            // 3. Build App Lists (as before)
+            buildList('blocked-apps-container', data.blocked_apps, '🚫');
             buildList('limited-apps-container', data.limited_apps, '🕒');
 
         } catch (e) {
