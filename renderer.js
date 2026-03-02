@@ -1,55 +1,48 @@
-const { exec } = require('child_process');
-const path = require('path'); // Add this line
+// Remove const { exec } = require('child_process'); - No longer needed!
 
-function syncLimitFromAirtable() {
-    const scriptPath = path.join(__dirname, 'backend.py');
+async function syncLimitFromAirtable() {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/sync');
+        const data = await response.json();
 
-    exec(`python "${scriptPath}"`, (error, stdout, stderr) => {
-        if (error || stderr) return;
-
-        try {
-            const data = JSON.parse(stdout);
-
-            const todayEl = document.getElementById('hub-daily-total-display');
-            if (todayEl) {
-                todayEl.innerText = data.today_time;
-            }
-
-            // 1. Update Daily Limit (Home/Limits screens)
-            const limitEl = document.getElementById('display-global-limit');
-            if (limitEl) limitEl.innerText = data.daily_limit;
-
-            // 2. Update Weekly Total (Apps screen) - NEW LOGIC
-            const weeklyEl = document.getElementById('weekly-total-display');
-            if (weeklyEl) {
-                weeklyEl.innerText = data.weekly_total || "0h 00m";
-            }
-
-
-            // 3. Build App Lists (as before)
-            buildList('blocked-apps-container', data.blocked_apps, '🚫');
-            buildList('limited-apps-container', data.limited_apps, '🕒');
-
-        } catch (e) {
-            console.error("Parsing Error:", e);
+        // If the server sent an error, stop here
+        if (data.error) {
+            console.error("Server reported an error:", data.error);
+            return;
         }
-    });
+
+        console.log("Clean data received:", data);
+
+        // Update elements with fallback values if data is missing
+        const todayEl = document.getElementById('hub-daily-total-display');
+        if (todayEl) todayEl.innerText = data.today_time || "0h 00m";
+
+        const limitEl = document.getElementById('display-global-limit');
+        if (limitEl) limitEl.innerText = data.daily_limit || "0h 00m";
+
+        const weeklyEl = document.getElementById('weekly-total-display');
+        if (weeklyEl) weeklyEl.innerText = data.weekly_total || "0h 00m";
+
+        buildList('blocked-apps-container', data.blocked_apps || [], '🚫');
+        buildList('limited-apps-container', data.limited_apps || [], '🕒');
+
+    } catch (e) {
+        console.error("Fetch failed entirely:", e);
+    }
 }
 
+// Keep your buildList function exactly as it was
 function buildList(containerId, appsArray, defaultIcon) {
     const container = document.getElementById(containerId);
     if (!container) return;
-
     container.innerHTML = '';
 
-    // IMPORTANT: Check if the array is empty or "None"
     if (!appsArray || appsArray.length === 0 || appsArray === "None") {
         container.innerHTML = '<p class="sub-text" style="margin-left:20px;">No apps restricted</p>';
         return;
     }
 
     appsArray.forEach(app => {
-        // Create the image tag if a logo URL exists
         const iconHtml = app.logo
             ? `<img src="${app.logo}" style="width:22px; height:22px; border-radius:4px; margin-right:10px; vertical-align:middle;">`
             : `<span class="icon-green" style="margin-right:10px;">${defaultIcon}</span>`;
@@ -65,8 +58,5 @@ function buildList(containerId, appsArray, defaultIcon) {
     });
 }
 
-// Make it global so the HTML button can find it
 window.syncLimitFromAirtable = syncLimitFromAirtable;
-
-// Run automatically on load
 document.addEventListener('DOMContentLoaded', syncLimitFromAirtable);
