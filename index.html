@@ -18,7 +18,7 @@
         <div class="logo-circle">🌳</div>
         <span>Screenless</span>
       </div>
-      <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
+      <div class="profile-icon" onclick="showScreen('screen-settings')">👤</div>
     </header>
 
     <div class="card progress-card">
@@ -52,14 +52,14 @@
         <span class="icon-green">⚡</span>
         <span class="label-text">Exercise For 30 Min</span>
       </div>
-      <div class="check-box checked">✓</div>
+      <div class="check-box checked" onclick="toggleTask(this)">✓</div>
     </div>
     <div class="card action-card">
       <div class="card-left">
         <span class="icon-green">📖</span>
         <span class="label-text">Read For 45 Min</span>
       </div>
-      <div class="add-box">+</div>
+      <div class="add-box" onclick="toggleTask(this)">+</div>
     </div>
 
     <h3 class="section-title">Reminders</h3>
@@ -71,7 +71,7 @@
           <span class="sub-text">Meditate for 10 minutes</span>
         </div>
       </div>
-      <div class="add-box">+</div>
+      <div class="add-box" onclick="toggleTask(this)">+</div>
     </div>
   </div>
 
@@ -79,7 +79,7 @@
     <header class="apps-header">
       <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
       <div class="logo-circle">🌳</div>
-      <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
+      <div class="profile-icon" onclick="showScreen('screen-settings')">👤</div>
     </header>
 
     <h2 class="page-title">Apps</h2>
@@ -163,7 +163,7 @@
   <div id="screen-limits" class="screen">
     <header class="limits-header">
       <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
-      <div class="profile-icon" onclick="showScreen('screen-profile')">👤</div>
+      <div class="profile-icon" onclick="showScreen('screen-settings')">👤</div>
     </header>
 
     <div class="center-logo">
@@ -192,20 +192,6 @@
 
     <div class="button-container">
       <button id="sync-btn" class="edit-limits-btn" onclick="syncLimitFromAirtable()">Sync from Cloud</button>
-    </div>
-  </div>
-
-  <div id="screen-profile" class="screen">
-    <header class="profile-header">
-      <span class="back-arrow" onclick="showScreen('screen-home')">〈</span>
-    </header>
-
-    <div class="profile-main">
-      <div class="avatar-container">
-        <div class="avatar-box">👤</div>
-      </div>
-      <h2 class="profile-name">Hello, Max!</h2>
-      <p class="profile-subtext">Profile Info</p>
     </div>
   </div>
 
@@ -293,8 +279,6 @@
     const target = document.getElementById(id);
     if (target) {
       target.classList.add('active');
-    } else {
-      console.error("Screen ID not found:", id);
     }
 
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -302,8 +286,19 @@
     if (id === 'screen-home') document.getElementById('nav-home').classList.add('active');
     if (id === 'screen-apps') document.getElementById('nav-apps').classList.add('active');
     if (id === 'screen-limits') document.getElementById('nav-limits').classList.add('active');
-    // Highlight settings icon for both profile and settings screens
-    if (id === 'screen-profile' || id === 'screen-settings') document.getElementById('nav-profile').classList.add('active');
+    if (id === 'screen-settings') document.getElementById('nav-profile').classList.add('active');
+  }
+
+  function toggleTask(element) {
+    if (element.classList.contains('add-box')) {
+      element.textContent = '✓';
+      element.classList.remove('add-box');
+      element.classList.add('check-box', 'checked');
+    } else {
+      element.textContent = '+';
+      element.classList.remove('check-box', 'checked');
+      element.classList.add('add-box');
+    }
   }
 </script>
 
