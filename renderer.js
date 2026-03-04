@@ -31,7 +31,7 @@ async function syncLimitFromAirtable() {
     }
 }
 
-// Keep your buildList function exactly as it was
+// Build each app as a dropdown card with a Remove button
 function buildList(containerId, appsArray, defaultIcon) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -43,20 +43,172 @@ function buildList(containerId, appsArray, defaultIcon) {
     }
 
     appsArray.forEach(app => {
-        const iconHtml = app.logo
-            ? `<img src="${app.logo}" style="width:22px; height:22px; border-radius:4px; margin-right:10px; vertical-align:middle;">`
-            : `<span class="icon-green" style="margin-right:10px;">${defaultIcon}</span>`;
-
-        container.innerHTML += `
-            <div class="card limit-item">
-                <div class="card-left">
-                    ${iconHtml}
-                    <span class="label-text">${app.name}</span>
-                </div>
-                <span class="icon-red">${defaultIcon === '🚫' ? '🔒' : '🕒'}</span>
-            </div>`;
+        container.appendChild(buildCard(app, defaultIcon));
     });
 }
 
+// Build a single app card element
+function buildCard(app, defaultIcon) {
+    const isBlocked = defaultIcon === '🚫';
+    const iconHtml = app.logo
+        ? `<img src="${app.logo}" style="width:22px; height:22px; border-radius:4px; margin-right:10px; vertical-align:middle;">`
+        : `<span class="icon-green" style="margin-right:10px;">${defaultIcon}</span>`;
+
+    const statusIcon = isBlocked ? '🔒' : '🕒';
+    const actionLabel = isBlocked ? '🕒 Limit' : '🔒 Block';
+    const targetContainer = isBlocked ? 'limited-apps-container' : 'blocked-apps-container';
+    const direction = isBlocked ? 'to_limited' : 'to_blocked';
+    const targetIcon = isBlocked ? '🕒' : '🚫';
+
+    const details = document.createElement('details');
+    details.className = 'card limit-item limit-dropdown';
+    details.dataset.app = JSON.stringify(app);
+    details.dataset.icon = defaultIcon;
+
+    details.innerHTML = `
+        <summary class="limit-summary">
+            <div class="card-left">
+                ${iconHtml}
+                <span class="label-text">${app.name}</span>
+            </div>
+            <span class="icon-red limit-status-icon">${statusIcon}</span>
+        </summary>
+        <div class="limit-dropdown-content">
+            <div class="limit-action-row">
+                <button class="remove-limit-btn"
+                    onclick="removeApp(this)">
+                    🗑 Remove
+                </button>
+                <button class="action-limit-btn"
+                    onclick="moveApp(this.closest('details'), '${targetContainer}', '${targetIcon}', '${direction}')">
+                    ${actionLabel}
+                </button>
+            </div>
+        </div>`;
+
+    return details;
+}
+
+// Remove an app — update Airtable then remove the card from the DOM
+async function removeApp(btn) {
+    const detailsEl = btn.closest('details');
+    const app = JSON.parse(detailsEl.dataset.app);
+
+    setCardBusy(detailsEl, true);
+    try {
+        const res = await fetch('http://127.0.0.1:5000/remove-app', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ app_id: app.id })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            detailsEl.remove();
+        } else {
+            console.error('Remove failed:', data.error);
+            setCardBusy(detailsEl, false);
+        }
+    } catch (e) {
+        console.error('Remove request failed:', e);
+        setCardBusy(detailsEl, false);
+    }
+}
+
+// Move an app card to the other container — update Airtable first
+async function moveApp(detailsEl, targetContainerId, targetIcon, direction) {
+    const app = JSON.parse(detailsEl.dataset.app);
+    const targetContainer = document.getElementById(targetContainerId);
+    if (!targetContainer) return;
+
+    setCardBusy(detailsEl, true);
+    try {
+        const res = await fetch('http://127.0.0.1:5000/move-app', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ app_id: app.id, direction })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            // Remove placeholder if present
+            const placeholder = targetContainer.querySelector('p');
+            if (placeholder) placeholder.remove();
+            detailsEl.remove();
+            targetContainer.appendChild(buildCard(app, targetIcon));
+        } else {
+            console.error('Move failed:', data.error);
+            setCardBusy(detailsEl, false);
+        }
+    } catch (e) {
+        console.error('Move request failed:', e);
+        setCardBusy(detailsEl, false);
+    }
+}
+
+// Disable / re-enable all buttons inside a card while a request is in-flight
+function setCardBusy(detailsEl, busy) {
+    detailsEl.querySelectorAll('button').forEach(b => {
+        b.disabled = busy;
+        b.style.opacity = busy ? '0.5' : '1';
+    });
+}
+
+
+// ── Daily limit inline editing ──────────────────────────────────────────────
+
+function openLimitEdit() {
+    // Parse current value e.g. "2h 30m" → hours=2, minutes=30
+    const current = document.getElementById('display-global-limit').innerText.trim();
+    const hMatch = current.match(/(\d+)\s*h/);
+    const mMatch = current.match(/(\d+)\s*m/);
+    document.getElementById('limit-hours').value = hMatch ? hMatch[1] : 0;
+    document.getElementById('limit-minutes').value = mMatch ? mMatch[1] : 0;
+
+    document.getElementById('display-global-limit').style.display = 'none';
+    document.getElementById('limit-edit-row').style.display = 'flex';
+    document.getElementById('limit-hours').focus();
+}
+
+function closeLimitEdit() {
+    document.getElementById('limit-edit-row').style.display = 'none';
+    document.getElementById('display-global-limit').style.display = '';
+}
+
+async function saveDailyLimit() {
+    const h = parseInt(document.getElementById('limit-hours').value) || 0;
+    const m = parseInt(document.getElementById('limit-minutes').value) || 0;
+    const limitStr = `${h}h ${String(m).padStart(2, '0')}m`;
+
+    const saveBtn = document.querySelector('.limit-save-btn');
+    saveBtn.textContent = '…';
+    saveBtn.disabled = true;
+
+    try {
+        const res = await fetch('http://127.0.0.1:5000/update-limit', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ limit: limitStr })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            document.getElementById('display-global-limit').innerText = limitStr;
+        } else {
+            console.error('Save failed:', data.error);
+        }
+    } catch (e) {
+        console.error('Save request failed:', e);
+    } finally {
+        saveBtn.textContent = '✓';
+        saveBtn.disabled = false;
+        closeLimitEdit();
+    }
+}
+
+window.openLimitEdit = openLimitEdit;
+window.closeLimitEdit = closeLimitEdit;
+window.saveDailyLimit = saveDailyLimit;
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 window.syncLimitFromAirtable = syncLimitFromAirtable;
+window.moveApp = moveApp;
 document.addEventListener('DOMContentLoaded', syncLimitFromAirtable);

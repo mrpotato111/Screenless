@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
 from pyairtable import Table,Api
@@ -17,7 +17,6 @@ BASE_ID = os.getenv("AIRTABLE_BASE_ID")
 USERS_TABLE = os.getenv("USERS_TABLE")
 APPS_TABLE = os.getenv("APPS_TABLE_NAME")
 USER_RECORD_ID = os.getenv("USER_RECORD_ID")
-
 api = Api(AIRTABLE_API_KEY)
 
 HEADERS = {"Authorization": f"Bearer {AIRTABLE_API_KEY}"}
@@ -57,6 +56,7 @@ def sync_data():
                     logo_url = logo_data[0].get('url') if logo_data else ""
 
                     detailed_list.append({
+                        "id":   rec_id,
                         "name": app_fields.get("Apps", "Unknown"),
                         "logo": logo_url,
                         "time": app_fields.get("UsageTime", "0m")
@@ -85,5 +85,79 @@ def sync_data():
         print(f"CRASH ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/move-app', methods=['PATCH'])
+def move_app():
+    """Move an app record from one list (blocked/limited) to the other."""
+    try:
+        body       = request.get_json()
+        app_id     = body.get('app_id')
+        direction  = body.get('direction')  # 'to_limited' or 'to_blocked'
+        if not app_id or direction not in ('to_limited', 'to_blocked'):
+            return jsonify({"error": "Invalid payload"}), 400
+
+        user = main_table.get(USER_RECORD_ID)
+        fields = user.get('fields', {})
+
+        blocked = list(fields.get('Blocked_apps', []))
+        limited = list(fields.get('limited_apps', []))
+
+        if direction == 'to_limited':
+            blocked = [r for r in blocked if r != app_id]
+            if app_id not in limited:
+                limited.append(app_id)
+        else:  # to_blocked
+            limited = [r for r in limited if r != app_id]
+            if app_id not in blocked:
+                blocked.append(app_id)
+
+        main_table.update(USER_RECORD_ID, {
+            'Blocked_apps': blocked,
+            'limited_apps': limited
+        })
+        return jsonify({"ok": True})
+    except Exception as e:
+        print(f"move-app ERROR: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/remove-app', methods=['PATCH'])
+def remove_app():
+    """Remove an app record from both blocked and limited lists."""
+    try:
+        body   = request.get_json()
+        app_id = body.get('app_id')
+        if not app_id:
+            return jsonify({"error": "No app_id provided"}), 400
+
+        user = main_table.get(USER_RECORD_ID)
+        fields = user.get('fields', {})
+
+        blocked = [r for r in fields.get('Blocked_apps', []) if r != app_id]
+        limited = [r for r in fields.get('limited_apps', [])  if r != app_id]
+
+        main_table.update(USER_RECORD_ID, {
+            'Blocked_apps': blocked,
+            'limited_apps': limited
+        })
+        return jsonify({"ok": True})
+    except Exception as e:
+        print(f"remove-app ERROR: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/update-limit', methods=['PATCH'])
+def update_limit():
+    try:
+        body = request.get_json()
+        new_limit = body.get('limit', '').strip()
+        if not new_limit:
+            return jsonify({"error": "No limit provided"}), 400
+
+        main_table.update(USER_RECORD_ID, {"Screen_time_limit": new_limit})
+        return jsonify({"ok": True, "limit": new_limit})
+    except Exception as e:
+        print(f"update-limit ERROR: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(port=5000, debug=False)

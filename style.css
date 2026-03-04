@@ -475,10 +475,13 @@ header {
 .nav-label {
     font-size: 0.7rem;
 }
+
 .card-left img {
     object-fit: cover;
-    background: #2d333b; /* Fallback background */
+    background: #2d333b;
+    /* Fallback background */
 }
+
 /* Settings Toggle Switches */
 .toggle-switch {
     width: 44px;
@@ -503,9 +506,158 @@ header {
 }
 
 .toggle-switch.active {
-    background-color: #34d399; /* Your accent green */
+    background-color: #34d399;
+    /* Your accent green */
 }
 
 .toggle-switch.active::after {
     transform: translateX(20px);
+}
+
+/* Limit dropdown cards */
+.limit-dropdown {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.limit-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    list-style: none;
+    user-select: none;
+}
+
+.limit-summary::-webkit-details-marker {
+    display: none;
+}
+
+.limit-status-icon {
+    transition: transform 0.25s ease;
+    margin-right: 0;
+}
+
+details[open] .limit-status-icon {
+    transform: rotate(20deg);
+}
+
+.limit-dropdown-content {
+    padding: 0 20px 16px;
+    border-top: 1px solid var(--border-color);
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.remove-limit-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 10px;
+    background: rgba(255, 82, 82, 0.12);
+    border: 1px solid var(--danger-red);
+    border-radius: 10px;
+    color: var(--danger-red);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.remove-limit-btn:hover {
+    background: rgba(255, 82, 82, 0.25);
+}
+
+.limit-action-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.limit-action-row .remove-limit-btn {
+    margin-top: 0;
+    flex: 1;
+}
+
+.action-limit-btn {
+    flex: 1;
+    padding: 10px;
+    background: rgba(0, 230, 118, 0.1);
+    border: 1px solid var(--accent-green);
+    border-radius: 10px;
+    color: var(--accent-green);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.action-limit-btn:hover {
+    background: rgba(0, 230, 118, 0.22);
+}
+
+/* Inline daily limit editor */
+.limit-pill-btn {
+    text-decoration: underline dotted var(--accent-green);
+    text-underline-offset: 3px;
+}
+
+.limit-input {
+    background: #0d1117;
+    border: 1px solid var(--accent-green);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 4px 2px;
+    /* hide spinner arrows */
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.limit-input::-webkit-outer-spin-button,
+.limit-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.limit-save-btn,
+.limit-cancel-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.limit-save-btn {
+    background: var(--accent-green);
+    color: #000;
+}
+
+.limit-save-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.limit-cancel-btn {
+    background: #30363d;
+    color: var(--text-main);
 }
