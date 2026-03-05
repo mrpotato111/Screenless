@@ -212,3 +212,118 @@ window.saveDailyLimit = saveDailyLimit;
 window.syncLimitFromAirtable = syncLimitFromAirtable;
 window.moveApp = moveApp;
 document.addEventListener('DOMContentLoaded', syncLimitFromAirtable);
+
+
+// ── Add App Modal ────────────────────────────────────────────────────────────
+
+let allAppsCache = null; // cache so we don't refetch every open
+
+async function openAddAppModal() {
+    const modal = document.getElementById('add-app-modal');
+    modal.classList.add('open');
+
+    if (!allAppsCache) {
+        await fetchAllApps();
+    } else {
+        renderModalApps(allAppsCache);
+    }
+}
+
+function closeAddAppModal(event) {
+    // If called from overlay click, only close if clicking the backdrop itself
+    if (event && event.target !== document.getElementById('add-app-modal')) return;
+    document.getElementById('add-app-modal').classList.remove('open');
+}
+
+async function fetchAllApps() {
+    const list = document.getElementById('modal-app-list');
+    list.innerHTML = '<div class="modal-loading"><span class="spinner"></span> Loading apps…</div>';
+
+    try {
+        const res  = await fetch('http://127.0.0.1:5000/get-apps');
+        const data = await res.json();
+        if (data.error) { list.innerHTML = `<p style="padding:20px;color:var(--danger-red);">${data.error}</p>`; return; }
+        allAppsCache = data;
+        renderModalApps(data);
+    } catch (e) {
+        list.innerHTML = '<p style="padding:20px;color:var(--danger-red);">Could not connect to server.</p>';
+    }
+}
+
+function renderModalApps(apps) {
+    const list = document.getElementById('modal-app-list');
+    list.innerHTML = '';
+
+    if (!apps.length) {
+        list.innerHTML = '<p style="padding:20px;color:var(--text-dim);">No apps found.</p>';
+        return;
+    }
+
+    apps.forEach(app => {
+        const row = document.createElement('div');
+        row.className = 'modal-app-row';
+        row.dataset.appId = app.id;
+
+        const logoHtml = app.logo
+            ? `<img src="${app.logo}" class="modal-app-logo" alt="${app.name}">`
+            : `<div class="modal-app-logo-placeholder">📱</div>`;
+
+        row.innerHTML = `
+            ${logoHtml}
+            <div class="modal-app-info">
+                <div class="modal-app-name">${app.name}</div>
+                <div class="modal-app-time">${app.time}</div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-limit" onclick="addAppFromModal(this, '${app.id}', 'limited')">🕒 Limit</button>
+                <button class="modal-btn modal-btn-block" onclick="addAppFromModal(this, '${app.id}', 'blocked')">🚫 Block</button>
+            </div>`;
+
+        list.appendChild(row);
+    });
+}
+
+async function addAppFromModal(btn, appId, listType) {
+    const row     = btn.closest('.modal-app-row');
+    const buttons = row.querySelectorAll('button');
+    buttons.forEach(b => { b.disabled = true; });
+    btn.textContent = '…';
+
+    try {
+        const res  = await fetch('http://127.0.0.1:5000/add-app', {
+            method:  'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ app_id: appId, list_type: listType })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            // Mark the relevant button as added; re-enable the other
+            buttons.forEach(b => {
+                b.disabled    = false;
+                b.textContent = b === btn
+                    ? (listType === 'limited' ? '🕒 Added' : '🚫 Added')
+                    : (listType === 'limited' ? '🚫 Block' : '🕒 Limit');
+                if (b === btn) {
+                    b.classList.remove('modal-btn-limit', 'modal-btn-block');
+                    b.classList.add('modal-btn-added');
+                    b.disabled = true;
+                }
+            });
+
+            // Refresh the limits screen lists in background
+            syncLimitFromAirtable();
+        } else {
+            console.error('add-app failed:', data.error);
+            btn.textContent = listType === 'limited' ? '🕒 Limit' : '🚫 Block';
+            buttons.forEach(b => { b.disabled = false; });
+        }
+    } catch (e) {
+        console.error('add-app request failed:', e);
+        btn.textContent = listType === 'limited' ? '🕒 Limit' : '🚫 Block';
+        buttons.forEach(b => { b.disabled = false; });
+    }
+}
+
+window.openAddAppModal  = openAddAppModal;
+window.closeAddAppModal = closeAddAppModal;
