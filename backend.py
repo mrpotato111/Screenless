@@ -159,5 +159,62 @@ def update_limit():
         print(f"update-limit ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/get-apps', methods=['GET'])
+def get_apps():
+    """Return all apps from the Apps table."""
+    try:
+        records = apps_table.all()
+        result = []
+        for rec in records:
+            f = rec.get('fields', {})
+            logo_data = f.get('Logo', [])
+            logo_url = logo_data[0].get('url') if logo_data else ""
+            result.append({
+                "id":   rec['id'],
+                "name": f.get("Apps", "Unknown"),
+                "logo": logo_url,
+                "time": f.get("UsageTime", "0m")
+            })
+        return jsonify(result)
+    except Exception as e:
+        print(f"get-apps ERROR: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/add-app', methods=['PATCH'])
+def add_app():
+    """Add an app to either blocked or limited list."""
+    try:
+        body      = request.get_json()
+        app_id    = body.get('app_id')
+        list_type = body.get('list_type')  # 'blocked' or 'limited'
+        if not app_id or list_type not in ('blocked', 'limited'):
+            return jsonify({"error": "Invalid payload"}), 400
+
+        user   = main_table.get(USER_RECORD_ID)
+        fields = user.get('fields', {})
+
+        blocked = list(fields.get('Blocked_apps', []))
+        limited = list(fields.get('limited_apps',  []))
+
+        if list_type == 'blocked':
+            if app_id not in blocked:
+                blocked.append(app_id)
+            limited = [r for r in limited if r != app_id]
+        else:
+            if app_id not in limited:
+                limited.append(app_id)
+            blocked = [r for r in blocked if r != app_id]
+
+        main_table.update(USER_RECORD_ID, {
+            'Blocked_apps': blocked,
+            'limited_apps': limited
+        })
+        return jsonify({"ok": True})
+    except Exception as e:
+        print(f"add-app ERROR: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(port=5000, debug=False)

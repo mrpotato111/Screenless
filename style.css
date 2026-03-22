@@ -12,6 +12,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: inherit;
 }
 
 body {
@@ -47,10 +48,26 @@ body {
 
 /* Header & Titles */
 header {
-    padding: 30px 24px 15px;
+    padding: 30px 20px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.limits-header {
+    padding: 30px 20px 15px;
+}
+
+.center-logo {
+    text-align: center;
+    padding: 0 20px;
+}
+
+.section-title-small {
+    margin: 20px 20px 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dim);
 }
 
 .logo-box {
@@ -79,14 +96,12 @@ header {
 }
 
 .section-title {
-    margin: 25px 20px 10px;
+    margin: 20px 20px 10px;
     font-size: 1.3rem;
-    font-family: serif;
 }
 
 .page-title {
     text-align: center;
-    font-family: serif;
     font-size: 1.8rem;
     margin: 10px 0;
 }
@@ -357,7 +372,6 @@ header {
 }
 
 .profile-name {
-    font-family: serif;
     font-size: 1.8rem;
 }
 
@@ -460,6 +474,9 @@ header {
     text-align: center;
     color: var(--text-dim);
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .nav-item.active {
@@ -470,6 +487,13 @@ header {
     display: block;
     font-size: 1.4rem;
     margin-bottom: 4px;
+}
+
+.profile-icon {
+    cursor: pointer;
+    color: var(--accent-green);
+    display: flex;
+    align-items: center;
 }
 
 .nav-label {
@@ -660,4 +684,666 @@ details[open] .limit-status-icon {
 .limit-cancel-btn {
     background: #30363d;
     color: var(--text-main);
+}
+
+/* ── Add App Button ────────────────────────────────────────────────────────── */
+.add-app-btn {
+    width: 100%;
+    padding: 15px;
+    background: rgba(0, 230, 118, 0.08);
+    border: 1px dashed var(--accent-green);
+    border-radius: 12px;
+    color: var(--accent-green);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.3px;
+}
+
+.add-app-btn:hover {
+    background: rgba(0, 230, 118, 0.16);
+}
+
+.add-app-btn:active {
+    transform: scale(0.98);
+}
+
+.add-app-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+/* ── Add App Modal ─────────────────────────────────────────────────────────── */
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-end;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    border-radius: 37px;
+}
+
+.modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-sheet {
+    width: 100%;
+    max-height: 72%;
+    background: #161b22;
+    border-radius: 24px 24px 0 0;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(30px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-overlay.open .modal-sheet {
+    transform: translateY(0);
+}
+
+.modal-handle {
+    width: 36px;
+    height: 4px;
+    background: #30363d;
+    border-radius: 2px;
+    margin: 12px auto 0;
+    flex-shrink: 0;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px 12px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: 0.3px;
+}
+
+.modal-close-btn {
+    background: #30363d;
+    border: none;
+    color: var(--text-dim);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.modal-close-btn:hover {
+    background: #444c56;
+    color: var(--text-main);
+}
+
+.modal-app-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px 0 16px;
+}
+
+/* Each app row in the modal */
+.modal-app-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 18px;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background 0.15s;
+}
+
+.modal-app-row:last-child {
+    border-bottom: none;
+}
+
+.modal-app-row:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.modal-app-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: #2d333b;
+    flex-shrink: 0;
+}
+
+.modal-app-logo-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #2d333b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.modal-app-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-app-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modal-app-time {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-top: 1px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.modal-btn {
+    padding: 6px 11px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid;
+    transition: background 0.18s, opacity 0.18s;
+    white-space: nowrap;
+}
+
+.modal-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.modal-btn-limit {
+    background: rgba(0, 230, 118, 0.1);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+.modal-btn-limit:hover:not(:disabled) {
+    background: rgba(0, 230, 118, 0.22);
+}
+
+.modal-btn-block {
+    background: rgba(255, 82, 82, 0.1);
+    border-color: var(--danger-red);
+    color: var(--danger-red);
+}
+
+.modal-btn-block:hover:not(:disabled) {
+    background: rgba(255, 82, 82, 0.22);
+}
+
+.modal-btn-added {
+    background: #30363d;
+    border-color: #30363d;
+    color: var(--text-dim);
+    cursor: default;
+}
+
+/* Loading spinner */
+.modal-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 30px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #30363d;
+    border-top-color: var(--accent-green);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Improved Settings Dropdowns ─────────────────────────────────────────── */
+.settings-dropdown-card {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 18px;
+}
+
+.settings-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    list-style: none;
+    user-select: none;
+}
+
+.settings-summary::-webkit-details-marker {
+    display: none;
+}
+
+.settings-summary-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.settings-icon-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.settings-icon-blue {
+    background: rgba(56, 139, 253, 0.18);
+}
+
+.settings-icon-yellow {
+    background: rgba(255, 200, 60, 0.18);
+}
+
+.settings-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.settings-badge-green {
+    background: rgba(0, 230, 118, 0.15);
+    color: var(--accent-green);
+    border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.settings-chevron {
+    color: var(--text-dim);
+    font-size: 1.3rem;
+    transition: transform 0.25s ease;
+    line-height: 1;
+}
+
+details.settings-dropdown-card[open] .settings-chevron {
+    transform: rotate(90deg);
+}
+
+.settings-dropdown-body {
+    border-top: 1px solid var(--border-color);
+    padding: 6px 18px 10px;
+    animation: slideDown 0.2s ease;
+}
+
+/* Permission rows */
+.settings-perm-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 2px;
+}
+
+.settings-perm-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-perm-icon {
+    font-size: 1.1rem;
+    width: 26px;
+    text-align: center;
+}
+
+.settings-perm-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.settings-perm-desc {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-top: 1px;
+}
+
+/* Real toggle switch */
+.settings-toggle {
+    width: 42px;
+    height: 24px;
+    border-radius: 12px;
+    background: #30363d;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.25s;
+    flex-shrink: 0;
+}
+
+.settings-toggle::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.settings-toggle.active {
+    background: var(--accent-green);
+}
+
+.settings-toggle.active::after {
+    transform: translateX(18px);
+}
+
+/* Activity rows */
+.settings-activity-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 2px;
+}
+
+.settings-act-check {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #30363d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    color: var(--text-dim);
+    border: 2px solid #30363d;
+}
+
+.settings-act-check.done {
+    background: rgba(0, 230, 118, 0.15);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+.settings-act-info {
+    flex: 1;
+}
+
+.settings-act-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.settings-act-meta {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-top: 1px;
+}
+
+.settings-act-xp {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    background: rgba(0, 230, 118, 0.1);
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 230, 118, 0.25);
+    white-space: nowrap;
+}
+
+/* ── SVG Icon Helpers ────────────────────────────────────────────────────── */
+.nav-svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    margin: 0 auto 3px;
+}
+
+.card-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.icon-green {
+    color: var(--accent-green);
+}
+
+.icon-red {
+    color: var(--danger-red);
+}
+
+/* Settings chevron SVG rotate on open */
+details.settings-dropdown-card[open] .settings-chevron {
+    transform: rotate(90deg);
+}
+
+.settings-chevron {
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+}
+
+/* ── Vertical Stats Card ─────────────────────────────────────────────────── */
+.stats-card-v2 {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+}
+
+.stats-row-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 12px;
+}
+
+.stats-row-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.stats-row-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.stats-row-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 5px;
+}
+
+.stats-row-bar-wrap {
+    width: 110px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stats-row-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+
+.stats-row-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    min-width: 55px;
+    text-align: right;
+}
+
+.stats-summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid var(--border-color);
+}
+
+.stats-summary-item {
+    text-align: center;
+    flex: 1;
+}
+
+.stats-summary-label {
+    font-size: 0.58rem;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    font-weight: 800;
+    margin-bottom: 3px;
+}
+
+.stats-summary-val {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent-green);
+}
+
+.stats-summary-divider {
+    width: 1px;
+    height: 30px;
+    background: var(--border-color);
+}
+
+.stats-card {
+    display: block;
+    padding: 24px;
+}
+
+.stats-container {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.stats-main {
+    border-right: 1px solid var(--border-color);
+    padding-right: 25px;
+}
+
+.total-label {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    font-weight: 800;
+}
+
+.total-time {
+    font-size: 1.5rem;
+    color: var(--accent-green);
+    margin-top: 4px;
+}
+
+.stats-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stats-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.dot.apps {
+    background: var(--accent-green);
+}
+
+.dot.web {
+    background: #3fb950;
+}
+
+.dot.other {
+    background: #216e39;
+}
+
+.stats-item .label {
+    color: var(--text-dim);
+    flex-grow: 1;
+}
+
+.stats-item .val {
+    color: white;
+    font-weight: 600;
 }
