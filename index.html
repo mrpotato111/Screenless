@@ -82,6 +82,11 @@
       <line x1="12" y1="9" x2="12" y2="13" />
       <line x1="12" y1="17" x2="12.01" y2="17" />
     </symbol>
+    <symbol id="ic-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </symbol>
     <symbol id="ic-smartphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round">
       <rect x="5" y="2" width="14" height="20" rx="2" />
@@ -160,75 +165,90 @@
         </div>
       </header>
 
-      <div class="card progress-card">
-        <div class="progress-header">
-          <div class="level-info">
-            <span class="label-text">Progress</span>
-            <h2 class="level-number">11</h2>
-            <span class="xp-text">Xp: 1487/2000</span>
+      <!-- Progress Card -->
+      <div class="card home-progress-card">
+        <div class="home-progress-top">
+          <div>
+            <span class="home-level-label">CURRENT LEVEL</span>
+            <div class="home-level-number" id="home-level-number">11</div>
           </div>
-          <div class="streak-badge">
-            <span class="sub-text">Days Streak</span>
-            <div class="streak-val">
-              <span style="font-size:1rem;line-height:1;margin-right:3px;">🔥</span>27
+          <div class="home-streak">
+            <span style="font-size:1.1rem;">🔥</span>
+            <span class="home-streak-val">27 days</span>
+          </div>
+        </div>
+        <div class="home-xp-row">
+          <span class="home-xp-label">XP Progress</span>
+          <span class="home-xp-val" id="home-xp-val">1487 / 2000</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-fill" style="width:65%;"></div>
+        </div>
+      </div>
+
+      <!-- Screen Time -->
+      <div class="card home-screentime-card">
+        <div class="home-screentime-left">
+          <div class="home-screentime-icon">
+            <svg width="18" height="18" style="color:var(--accent-green)">
+              <use href="#ic-timer" />
+            </svg>
+          </div>
+          <span class="home-task-label">Screen Time Today</span>
+        </div>
+        <span class="home-task-label" id="hub-daily-total-display">0min</span>
+      </div>
+
+      <!-- Today's Plan -->
+      <div class="home-section-header">
+        <h3 class="home-section-title">Today's Plan</h3>
+        <span class="home-view-all" onclick="openTasksOverlay()">View All</span>
+      </div>
+
+      <div id="home-tasks-list"></div>
+
+      <!-- Reminders -->
+      <div class="home-section-header">
+        <h3 class="home-section-title">
+          <svg width="16" height="16" style="color:var(--accent-green);vertical-align:middle;margin-right:6px;">
+            <use href="#ic-bell" />
+          </svg>
+          Reminders
+        </h3>
+        <span class="home-view-all" onclick="openRemindersOverlay()">View All</span>
+      </div>
+
+      <div id="home-reminders-grid" class="home-reminders-grid"></div>
+
+      <!-- Reminders overlay -->
+      <div id="reminders-overlay" class="modal-overlay" onclick="closeRemindersOverlay(event)">
+        <div class="modal-sheet" style="max-height:88%;">
+          <div class="modal-handle"></div>
+          <div class="modal-header">
+            <span class="modal-title">Reminders</span>
+            <button class="modal-close-btn" onclick="closeRemindersOverlayDirect()">
+              <svg width="12" height="12">
+                <use href="#ic-x" />
+              </svg>
+            </button>
+          </div>
+          <div id="reminders-overlay-list" class="tasks-overlay-list"></div>
+          <div class="tasks-add-section">
+            <div class="reminder-cat-row" id="reminder-cat-row"></div>
+            <div class="tasks-input-row">
+              <span id="reminder-cat-preview" class="reminder-cat-pill-preview">GENERAL</span>
+              <input id="new-reminder-input" class="tasks-new-input" placeholder="Add a reminder..."
+                onkeydown="if(event.key==='Enter') addNewReminder()">
+              <button class="tasks-add-btn" onclick="addNewReminder()">
+                <svg width="14" height="14">
+                  <use href="#ic-plus" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
-        <div class="progress-bar-container">
-          <div class="progress-fill" style="width: 65%;"></div>
-        </div>
-        <span class="next-level-text">533xp until next level</span>
       </div>
 
-      <div class="card simple-card">
-        <span class="label-text">Screen Time Today</span>
-        <span class="time-val">
-          <svg width="15" height="15" style="color:var(--accent-green);vertical-align:middle;margin-right:5px">
-            <use href="#ic-timer" />
-          </svg>
-          <span id="hub-daily-total-display">0min</span>
-        </span>
-      </div>
-
-      <h3 class="section-title">Today's Plan</h3>
-      <div class="card action-card">
-        <div class="card-left">
-          <span style="font-size:1.1rem;margin-right:10px;line-height:1;filter:none;">⚡</span>
-          <span class="label-text">Exercise For 30 Min</span>
-        </div>
-        <div class="check-box checked" onclick="toggleTask(this)">
-          <svg width="13" height="13">
-            <use href="#ic-check" />
-          </svg>
-        </div>
-      </div>
-      <div class="card action-card">
-        <div class="card-left">
-          <span style="font-size:1.1rem;margin-right:10px;line-height:1;">📖</span>
-          <span class="label-text">Read For 45 Min</span>
-        </div>
-        <div class="add-box" onclick="toggleTask(this)">
-          <svg width="13" height="13">
-            <use href="#ic-plus" />
-          </svg>
-        </div>
-      </div>
-
-      <h3 class="section-title">Reminders</h3>
-      <div class="card action-card">
-        <div class="card-left">
-          <span style="font-size:1.1rem;margin-right:10px;line-height:1;">📞</span>
-          <div>
-            <span class="label-text">Call Mom</span>
-            <span class="sub-text">Meditate for 10 minutes</span>
-          </div>
-        </div>
-        <div class="add-box" onclick="toggleTask(this)">
-          <svg width="13" height="13">
-            <use href="#ic-plus" />
-          </svg>
-        </div>
-      </div>
     </div>
 
     <div id="screen-apps" class="screen">
@@ -446,9 +466,9 @@
       <div class="button-container">
         <button id="add-app-btn" class="add-app-btn" onclick="openAddAppModal()">
           <svg width="16" height="16" style="flex-shrink:0">
-            <use href="#ic-plus" />
+            <use href="#ic-gear" />
           </svg>
-          Add App
+          Edit Limits
         </button>
       </div>
     </div>
@@ -489,6 +509,196 @@
         <h2 class="profile-name">Hello, Max!</h2>
         <p class="profile-subtext">Profile Info</p>
       </div>
+
+
+
+      <!-- Daily Goal -->
+      <div class="card settings-feature-card" style="display:block;">
+        <div class="settings-feature-header">
+          <div class="settings-icon-wrap" style="background:rgba(0,230,118,0.12);">
+            <svg width="16" height="16" style="color:var(--accent-green)">
+              <use href="#ic-check" />
+            </svg>
+          </div>
+          <div>
+            <div class="label-text">Daily Goal</div>
+            <div class="sub-text" style="font-size:0.72rem;">Something to do without a screen</div>
+          </div>
+        </div>
+        <div id="daily-goal-view" class="daily-goal-view">
+          <div id="daily-goal-display" class="daily-goal-display" onclick="openGoalEdit()">
+            <span id="daily-goal-text" style="color:var(--text-dim);">Tap to set a goal…</span>
+          </div>
+          <div class="daily-goal-check-wrap">
+            <div class="check-box" id="goal-check-box" onclick="toggleGoalDone()" style="cursor:pointer;">
+              <svg width="13" height="13">
+                <use href="#ic-check" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div id="daily-goal-edit" style="display:none;align-items:center;gap:8px;margin-top:10px;">
+          <input id="goal-input" type="text" class="goal-input" placeholder="e.g. Read for 30 min">
+          <button class="limit-save-btn" onclick="saveGoal()"><svg width="12" height="12">
+              <use href="#ic-check" />
+            </svg></button>
+          <button class="limit-cancel-btn" onclick="closeGoalEdit()"><svg width="12" height="12">
+              <use href="#ic-x" />
+            </svg></button>
+        </div>
+      </div>
+
+      <!-- Focus Mode -->
+      <div class="card settings-feature-card">
+        <div class="settings-feature-header" style="flex:1;">
+          <div class="settings-icon-wrap" style="background:rgba(255,160,0,0.15);">
+            <svg width="16" height="16" style="color:#ffa000">
+              <use href="#ic-bolt" />
+            </svg>
+          </div>
+          <div>
+            <div class="label-text">Focus Mode</div>
+            <div class="sub-text" style="font-size:0.72rem;" id="focus-status-text">Block all apps temporarily</div>
+          </div>
+        </div>
+        <button class="focus-btn" id="focus-btn" onclick="toggleFocus()">Start</button>
+      </div>
+
+      <!-- Activities dropdown -->
+      <details class="card settings-dropdown-card" style="margin-bottom:10px;">
+        <summary class="settings-summary">
+          <div class="settings-summary-left">
+            <div class="settings-icon-wrap settings-icon-yellow">
+              <svg width="16" height="16" style="color:#f0b429">
+                <use href="#ic-bolt" />
+              </svg>
+            </div>
+            <div>
+              <span class="label-text">Activities</span>
+              <span class="settings-badge settings-badge-green">2 Done</span>
+            </div>
+          </div>
+          <svg width="16" height="16" class="settings-chevron" style="color:var(--text-dim)">
+            <use href="#ic-chevron-right" />
+          </svg>
+        </summary>
+        <div class="settings-dropdown-body">
+          <div class="settings-activity-row">
+            <div class="settings-act-check done">
+              <svg width="12" height="12">
+                <use href="#ic-check" />
+              </svg>
+            </div>
+            <div class="settings-act-info">
+              <div class="settings-act-name">Today's Exercise</div>
+              <div class="settings-act-meta">30 min · Completed</div>
+            </div>
+            <div class="settings-act-xp">+50 XP</div>
+          </div>
+          <div class="settings-activity-row" style="border-bottom:none;margin-bottom:0;">
+            <div class="settings-act-check done">
+              <svg width="12" height="12">
+                <use href="#ic-check" />
+              </svg>
+            </div>
+            <div class="settings-act-info">
+              <div class="settings-act-name">Reading Session</div>
+              <div class="settings-act-meta">45 min · Completed</div>
+            </div>
+            <div class="settings-act-xp">+75 XP</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Weekly Report -->
+      <div class="card settings-feature-card" style="display:block;">
+        <div class="settings-feature-header">
+          <div class="settings-icon-wrap" style="background:rgba(56,139,253,0.15);">
+            <svg width="16" height="16" style="color:#388bfd">
+              <use href="#ic-chart" />
+            </svg>
+          </div>
+          <div>
+            <div class="label-text">Weekly Report</div>
+            <div class="sub-text" style="font-size:0.72rem;">This week vs last week</div>
+          </div>
+        </div>
+        <div class="weekly-report-body">
+          <div class="weekly-stat-row">
+            <span class="weekly-stat-label">This week</span>
+            <span class="weekly-stat-val" id="wr-this-week">—</span>
+          </div>
+          <div class="weekly-stat-row">
+            <span class="weekly-stat-label">Last week</span>
+            <span class="weekly-stat-val" id="wr-last-week">—</span>
+          </div>
+          <div class="weekly-change-badge" id="wr-change-badge">—</div>
+        </div>
+      </div>
+
+      <!-- Most Used Apps -->
+      <div class="card profile-card-new" style="padding:15px;display:block;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <p class="card-inner-title" style="margin:0;color:#888;">Most Used Apps</p>
+          <button class="apps-expand-btn" onclick="openAppsOverlay()">
+            <svg width="13" height="13">
+              <use href="#ic-layers" />
+            </svg>
+            All
+          </button>
+        </div>
+        <div id="most-used-grid" class="apps-grid-new apps-grid-preview"></div>
+      </div>
+
+      <!-- Schedule & Alerts -->
+      <details class="card settings-dropdown-card" style="margin-bottom:10px;">
+        <summary class="settings-summary">
+          <div class="settings-summary-left">
+            <div class="settings-icon-wrap" style="background:rgba(120,86,255,0.15);">
+              <svg width="16" height="16" style="color:#7856ff">
+                <use href="#ic-hourglass" />
+              </svg>
+            </div>
+            <span class="label-text">Schedule &amp; Alerts</span>
+          </div>
+          <svg width="16" height="16" class="settings-chevron" style="color:var(--text-dim)">
+            <use href="#ic-chevron-right" />
+          </svg>
+        </summary>
+        <div class="settings-dropdown-body">
+          <div class="settings-perm-row">
+            <div class="settings-perm-left">
+              <div class="settings-perm-icon">
+                <svg width="18" height="18" style="color:#7856ff">
+                  <use href="#ic-hourglass" />
+                </svg>
+              </div>
+              <div>
+                <div class="settings-perm-name">Bedtime Mode</div>
+                <div class="settings-perm-desc">Block apps from set time</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="time" id="bedtime-input" class="time-input" value="22:00" onchange="saveBedtime(this.value)">
+              <div class="settings-toggle" id="bedtime-toggle" onclick="toggleBedtime()"></div>
+            </div>
+          </div>
+          <div class="settings-perm-row" style="border-bottom:none;margin-bottom:0;">
+            <div class="settings-perm-left">
+              <div class="settings-perm-icon">
+                <svg width="18" height="18" style="color:#ffa000">
+                  <use href="#ic-alert" />
+                </svg>
+              </div>
+              <div>
+                <div class="settings-perm-name">Limit Notifications</div>
+                <div class="settings-perm-desc">Alert at 80% of daily limit</div>
+              </div>
+            </div>
+            <div class="settings-toggle active" id="notif-toggle" onclick="this.classList.toggle('active')"></div>
+          </div>
+        </div>
+      </details>
 
       <!-- Permissions dropdown -->
       <details class="card settings-dropdown-card" style="margin-bottom:10px;">
@@ -540,68 +750,81 @@
         </div>
       </details>
 
-      <!-- Activities dropdown -->
-      <details class="card settings-dropdown-card" style="margin-bottom:10px;">
-        <summary class="settings-summary">
-          <div class="settings-summary-left">
-            <div class="settings-icon-wrap settings-icon-yellow">
-              <svg width="16" height="16" style="color:#f0b429">
-                <use href="#ic-bolt" />
-              </svg>
-            </div>
-            <div>
-              <span class="label-text">Activities</span>
-              <span class="settings-badge settings-badge-green">2 Done</span>
-            </div>
-          </div>
-          <svg width="16" height="16" class="settings-chevron" style="color:var(--text-dim)">
-            <use href="#ic-chevron-right" />
-          </svg>
-        </summary>
-        <div class="settings-dropdown-body">
-          <div class="settings-activity-row">
-            <div class="settings-act-check done">
+      <!-- Apps overlay -->
+      <div id="apps-overlay" class="modal-overlay" onclick="closeAppsOverlay(event)">
+        <div class="modal-sheet" style="max-height:80%;">
+          <div class="modal-handle"></div>
+          <div class="modal-header">
+            <span class="modal-title">All Apps</span>
+            <button class="modal-close-btn" onclick="closeAppsOverlay()">
               <svg width="12" height="12">
-                <use href="#ic-check" />
+                <use href="#ic-x" />
               </svg>
-            </div>
-            <div class="settings-act-info">
-              <div class="settings-act-name">Today's Exercise</div>
-              <div class="settings-act-meta">30 min · Completed</div>
-            </div>
-            <div class="settings-act-xp">+50 XP</div>
+            </button>
           </div>
-          <div class="settings-activity-row" style="border-bottom:none;margin-bottom:0;">
-            <div class="settings-act-check done">
-              <svg width="12" height="12">
-                <use href="#ic-check" />
+          <div id="apps-overlay-grid" class="apps-overlay-grid"></div>
+          <div id="overlay-app-info" class="overlay-app-info" style="display:none;">
+            <img id="overlay-info-logo" src="" alt="" class="overlay-info-logo">
+            <div class="overlay-info-text">
+              <div id="overlay-info-name" class="overlay-info-name"></div>
+              <div id="overlay-info-time" class="overlay-info-time"></div>
+            </div>
+            <button class="tooltip-close" onclick="closeOverlayInfo()">
+              <svg width="11" height="11">
+                <use href="#ic-x" />
               </svg>
-            </div>
-            <div class="settings-act-info">
-              <div class="settings-act-name">Reading Session</div>
-              <div class="settings-act-meta">45 min · Completed</div>
-            </div>
-            <div class="settings-act-xp">+75 XP</div>
+            </button>
           </div>
         </div>
-      </details>
+      </div>
 
-      <div class="card profile-card-new" style="padding:15px;">
-        <p class="card-inner-title" style="margin-top:0;color:#888;">Most Used Apps</p>
-        <div class="apps-grid-new" style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-          <div class="app-item" style="text-align:center;">
-            <div class="app-icon-outline" style="background:#30363d;padding:10px;border-radius:12px;">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="grid-app-img"
-                style="width:30px;">
-            </div>
-            <span class="app-label" style="display:block;font-size:0.8rem;margin-top:5px;">Instagram</span>
+      <!-- Floating tooltip -->
+      <div id="app-time-tooltip" class="app-time-tooltip" style="display:none;">
+        <div class="app-time-tooltip-inner">
+          <img id="tooltip-logo" src="" alt="" class="tooltip-logo">
+          <div>
+            <div id="tooltip-name" class="tooltip-name"></div>
+            <div id="tooltip-time" class="tooltip-time"></div>
           </div>
-          <div class="app-item" style="text-align:center;">
-            <div class="app-icon-outline" style="background:#30363d;padding:10px;border-radius:12px;">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg"
-                class="grid-app-img" style="width:30px;">
-            </div>
-            <span class="app-label" style="display:block;font-size:0.8rem;margin-top:5px;">YouTube</span>
+          <button class="tooltip-close" onclick="closeAppTooltip()">
+            <svg width="11" height="11">
+              <use href="#ic-x" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks overlay — direct child of mobile-container so it overlays all screens -->
+    <div id="tasks-overlay" class="modal-overlay" onclick="closeTasksOverlay(event)">
+      <div class="modal-sheet" style="max-height:88%;">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+          <span class="modal-title">Today's Plan</span>
+          <button class="modal-close-btn" onclick="closeTasksOverlayDirect()">
+            <svg width="12" height="12">
+              <use href="#ic-x" />
+            </svg>
+          </button>
+        </div>
+        <div class="tasks-progress-wrap">
+          <span id="tasks-progress-text" class="tasks-progress-text">0 of 0 completed</span>
+          <div class="tasks-progress-track">
+            <div id="tasks-progress-fill" class="tasks-progress-fill"></div>
+          </div>
+        </div>
+        <div id="tasks-overlay-list" class="tasks-overlay-list"></div>
+        <div class="tasks-add-section">
+          <div id="emoji-picker-row" class="tasks-emoji-row"></div>
+          <div class="tasks-input-row">
+            <span id="emoji-preview" class="tasks-emoji-preview">⭐</span>
+            <input id="new-task-input" class="tasks-new-input" placeholder="Add a new task..."
+              onkeydown="if(event.key==='Enter') addNewTask()">
+            <button class="tasks-add-btn" onclick="addNewTask()">
+              <svg width="14" height="14">
+                <use href="#ic-plus" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
