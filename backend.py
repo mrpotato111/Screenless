@@ -48,10 +48,10 @@ def sync_data():
             limit_records = app_limits_table.all()
             for rec in limit_records:
                 f = rec.get('fields', {})
-                if USER_RECORD_ID in f.get('user', []):
-                    for aid in f.get('app', []):
+                if USER_RECORD_ID in f.get('User', []):
+                    for aid in f.get('App', []):
                         limit_map[aid] = {
-                            "limit": f.get("limit", ""),
+                            "limit": f.get("Limit", ""),
                             "limit_record_id": rec['id']
                         }
         except Exception as e:
@@ -188,7 +188,7 @@ def update_app_limit():
         new_limit = body.get('limit', '').strip()
         if not record_id or not new_limit:
             return jsonify({"error": "Invalid payload"}), 400
-        app_limits_table.update(record_id, {"limit": new_limit})
+        app_limits_table.update(record_id, {"Limit": new_limit})
         return jsonify({"ok": True, "limit": new_limit})
     except Exception as e:
         print(f"update-app-limit ERROR: {str(e)}")
