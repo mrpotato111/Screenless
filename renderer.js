@@ -81,13 +81,20 @@ function buildCard(app, defaultIcon) {
             </div>
         </div>` : '';
 
+    const limitBadge = !isBlocked && app.limit
+        ? `<span class="app-limit-badge">${app.limit}</span>`
+        : '';
+
     details.innerHTML = `
         <summary class="limit-summary">
             <div class="card-left">
                 ${iconHtml}
                 <span class="label-text">${app.name}</span>
             </div>
-            <span class="icon-red limit-status-icon">${statusIcon}</span>
+            <div class="card-right">
+                ${limitBadge}
+                <span class="icon-red limit-status-icon">${statusIcon}</span>
+            </div>
         </summary>
         <div class="limit-dropdown-content">
             ${limitRow}

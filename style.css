@@ -585,6 +585,22 @@ header {
     display: none;
 }
 
+.card-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.app-limit-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent-green);
+    background: rgba(0, 230, 118, 0.12);
+    border: 1px solid rgba(0, 230, 118, 0.3);
+    border-radius: 6px;
+    padding: 2px 7px;
+}
+
 .limit-status-icon {
     transition: transform 0.25s ease;
     margin-right: 0;
