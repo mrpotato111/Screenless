@@ -2244,3 +2244,69 @@ details.settings-dropdown-card[open] .settings-chevron {
     white-space: nowrap;
     flex-shrink: 0;
 }
+/* ── Per-app time limit row ─────────────────────────────────────── */
+.app-limit-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.app-limit-label {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+}
+
+.app-limit-display {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-green);
+    cursor: pointer;
+    border-bottom: 1px dashed var(--accent-green);
+}
+
+.app-limit-display:hover {
+    opacity: 0.8;
+}
+
+.app-limit-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+.app-limit-hours,
+.app-limit-minutes {
+    width: 44px;
+    padding: 4px 6px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.app-limit-edit-row .limit-save-btn,
+.app-limit-edit-row .limit-cancel-btn {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid;
+}
+
+.app-limit-edit-row .limit-save-btn {
+    background: rgba(0, 230, 118, 0.12);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+.app-limit-edit-row .limit-cancel-btn {
+    background: rgba(255, 82, 82, 0.1);
+    border-color: var(--danger-red);
+    color: var(--danger-red);
+}

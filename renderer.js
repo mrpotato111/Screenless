@@ -69,6 +69,18 @@ function buildCard(app, defaultIcon) {
     details.dataset.app = JSON.stringify(app);
     details.dataset.icon = defaultIcon;
 
+    const limitRow = !isBlocked ? `
+        <div class="app-limit-row">
+            <span class="app-limit-label">Time limit:</span>
+            <span class="app-limit-display" onclick="openAppLimitEdit(this)">${app.limit || 'Not set'}</span>
+            <div class="app-limit-edit-row" style="display:none;">
+                <input type="number" class="app-limit-hours" min="0" max="23" placeholder="0">h
+                <input type="number" class="app-limit-minutes" min="0" max="59" placeholder="0">m
+                <button class="limit-save-btn" onclick="saveAppLimit(this)">✓</button>
+                <button class="limit-cancel-btn" onclick="closeAppLimitEdit(this)">✕</button>
+            </div>
+        </div>` : '';
+
     details.innerHTML = `
         <summary class="limit-summary">
             <div class="card-left">
@@ -78,6 +90,7 @@ function buildCard(app, defaultIcon) {
             <span class="icon-red limit-status-icon">${statusIcon}</span>
         </summary>
         <div class="limit-dropdown-content">
+            ${limitRow}
             <div class="limit-action-row">
                 <button class="remove-limit-btn"
                     onclick="removeApp(this)">
@@ -156,6 +169,65 @@ function setCardBusy(detailsEl, busy) {
     });
 }
 
+
+// ── Per-app limit inline editing ────────────────────────────────────────────
+
+function openAppLimitEdit(displayEl) {
+    const row = displayEl.closest('.app-limit-row');
+    const current = displayEl.textContent.trim();
+    const hMatch = current.match(/(\d+)\s*h/);
+    const mMatch = current.match(/(\d+)\s*m/);
+    row.querySelector('.app-limit-hours').value = hMatch ? hMatch[1] : 0;
+    row.querySelector('.app-limit-minutes').value = mMatch ? mMatch[1] : 0;
+    displayEl.style.display = 'none';
+    row.querySelector('.app-limit-edit-row').style.display = 'flex';
+    row.querySelector('.app-limit-hours').focus();
+}
+
+function closeAppLimitEdit(btn) {
+    const row = btn.closest('.app-limit-row');
+    row.querySelector('.app-limit-edit-row').style.display = 'none';
+    row.querySelector('.app-limit-display').style.display = '';
+}
+
+async function saveAppLimit(btn) {
+    const row = btn.closest('.app-limit-row');
+    const detailsEl = btn.closest('details');
+    const app = JSON.parse(detailsEl.dataset.app);
+
+    const h = parseInt(row.querySelector('.app-limit-hours').value) || 0;
+    const m = parseInt(row.querySelector('.app-limit-minutes').value) || 0;
+    const limitStr = `${h}h ${String(m).padStart(2, '0')}m`;
+
+    btn.textContent = '…';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('http://127.0.0.1:5000/update-app-limit', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ record_id: app.limit_record_id, limit: limitStr })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            row.querySelector('.app-limit-display').textContent = limitStr;
+            app.limit = limitStr;
+            detailsEl.dataset.app = JSON.stringify(app);
+        } else {
+            console.error('saveAppLimit failed:', data.error);
+        }
+    } catch (e) {
+        console.error('saveAppLimit request failed:', e);
+    } finally {
+        btn.textContent = '✓';
+        btn.disabled = false;
+        closeAppLimitEdit(btn);
+    }
+}
+
+window.openAppLimitEdit = openAppLimitEdit;
+window.closeAppLimitEdit = closeAppLimitEdit;
+window.saveAppLimit = saveAppLimit;
 
 // ── Daily limit inline editing ──────────────────────────────────────────────
 

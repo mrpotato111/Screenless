@@ -21,8 +21,11 @@ api = Api(AIRTABLE_API_KEY)
 
 HEADERS = {"Authorization": f"Bearer {AIRTABLE_API_KEY}"}
 
+APP_LIMITS_TABLE = os.getenv("APP_LIMITS_TABLE", "App_limits")
+
 main_table = api.table(BASE_ID, USERS_TABLE)
 apps_table = api.table(BASE_ID, APPS_TABLE)
+app_limits_table = api.table(BASE_ID, APP_LIMITS_TABLE)
 
 @app.route('/sync', methods=['GET'])
 def sync_data():
@@ -39,46 +42,64 @@ def sync_data():
         fields = data.get('fields', {})
 
 
-        # 3. Define the formatter
-        def get_app_details(record_ids):
+        # 3. Fetch App_limits for this user and build a lookup map
+        limit_map = {}  # app_record_id -> {limit, limit_record_id}
+        try:
+            limit_records = app_limits_table.all()
+            for rec in limit_records:
+                f = rec.get('fields', {})
+                if USER_RECORD_ID in f.get('user', []):
+                    for aid in f.get('app', []):
+                        limit_map[aid] = {
+                            "limit": f.get("limit", ""),
+                            "limit_record_id": rec['id']
+                        }
+        except Exception as e:
+            print(f"Could not fetch App_limits: {e}")
+
+        # 4. Define the formatter
+        def get_app_details(record_ids, include_limits=False):
             if not record_ids:
                 return []
 
             detailed_list = []
             for rec_id in record_ids:
                 try:
-                    # Fetch the specific app record from the Apps table
                     app_rec = apps_table.get(rec_id)
                     app_fields = app_rec.get('fields', {})
 
-                    # Get Logo URL (handling the Attachment list structure)
                     logo_data = app_fields.get('Logo', [])
                     logo_url = logo_data[0].get('url') if logo_data else ""
 
-                    detailed_list.append({
+                    entry = {
                         "id":   rec_id,
                         "name": app_fields.get("Apps", "Unknown"),
                         "logo": logo_url,
                         "time": app_fields.get("UsageTime", "0m")
-                    })
+                    }
+                    if include_limits:
+                        lim = limit_map.get(rec_id, {})
+                        entry["limit"] = lim.get("limit", "")
+                        entry["limit_record_id"] = lim.get("limit_record_id", "")
+                    detailed_list.append(entry)
                 except Exception as e:
                     print(f"Skipping app record {rec_id}: {e}")
                     continue
             return detailed_list
 
-        # 4. Create a plain Python dictionary (The Payload)
+        # 5. Create a plain Python dictionary (The Payload)
         payload = {
             "today_time": fields.get("Screentime_today", "0h 00m"),
             "daily_limit": fields.get("Screen_time_limit", "0h 00m"),
             "weekly_total": fields.get("Screentime_this_week", "0h 00m"),
             "blocked_apps": get_app_details(fields.get("Blocked_apps", [])),
-            "limited_apps": get_app_details(fields.get("limited_apps", []))
+            "limited_apps": get_app_details(fields.get("limited_apps", []), include_limits=True)
         }
 
-        # 5. Print the payload (not the response object) for debugging
+        # 6. Print the payload (not the response object) for debugging
         print(f"Sending to Electron: {payload}")
 
-        # 6. Send it back as JSON
+        # 7. Send it back as JSON
         return jsonify(payload)
 
     except Exception as e:
@@ -158,6 +179,21 @@ def update_limit():
     except Exception as e:
         print(f"update-limit ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@app.route('/update-app-limit', methods=['PATCH'])
+def update_app_limit():
+    try:
+        body = request.get_json()
+        record_id = body.get('record_id')
+        new_limit = body.get('limit', '').strip()
+        if not record_id or not new_limit:
+            return jsonify({"error": "Invalid payload"}), 400
+        app_limits_table.update(record_id, {"limit": new_limit})
+        return jsonify({"ok": True, "limit": new_limit})
+    except Exception as e:
+        print(f"update-app-limit ERROR: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/get-apps', methods=['GET'])
 def get_apps():
