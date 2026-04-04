@@ -5,15 +5,12 @@ async function syncLimitFromAirtable() {
         const response = await fetch('http://127.0.0.1:5000/sync');
         const data = await response.json();
 
-        // If the server sent an error, stop here
         if (data.error) {
             console.error("Server reported an error:", data.error);
             return;
         }
 
-        console.log("Clean data received:", data);
-
-        // Update elements with fallback values if data is missing
+        // Update screen time displays
         const todayEl = document.getElementById('hub-daily-total-display');
         if (todayEl) todayEl.innerText = data.today_time || "0h 00m";
 
@@ -26,9 +23,17 @@ async function syncLimitFromAirtable() {
         buildList('blocked-apps-container', data.blocked_apps || [], '🚫');
         buildList('limited-apps-container', data.limited_apps || [], '🕒');
 
+        // Set Level & EXP from Airtable — only on first load, not on polls
+        // (polls would overwrite XP earned in-session before the write confirms)
+        if (data.level !== undefined && data.exp !== undefined && !xpState.seededFromAirtable) {
+            xpState.level = Number(data.level);
+            xpState.xp    = Number(data.exp);
+            xpState.seededFromAirtable = true;
+            renderXP();
+        }
+
         fetchMostUsedApps();
         updateWeeklyReport(data.weekly_total);
-        checkScreenTimeLimitXP(data.today_time, data.daily_limit);
 
     } catch (e) {
         console.error("Fetch failed entirely:", e);
@@ -64,11 +69,6 @@ function buildCard(app, defaultIcon) {
     const direction = isBlocked ? 'to_limited' : 'to_blocked';
     const targetIcon = isBlocked ? '🕒' : '🚫';
 
-    const details = document.createElement('details');
-    details.className = 'card limit-item limit-dropdown';
-    details.dataset.app = JSON.stringify(app);
-    details.dataset.icon = defaultIcon;
-
     const limitRow = !isBlocked ? `
         <div class="app-limit-row">
             <span class="app-limit-label">Time limit:</span>
@@ -85,6 +85,11 @@ function buildCard(app, defaultIcon) {
         ? `<span class="app-limit-badge">${app.limit}</span>`
         : '';
 
+    const details = document.createElement('details');
+    details.className = 'card limit-item limit-dropdown';
+    details.dataset.app = JSON.stringify(app);
+    details.dataset.icon = defaultIcon;
+
     details.innerHTML = `
         <summary class="limit-summary">
             <div class="card-left">
@@ -99,8 +104,7 @@ function buildCard(app, defaultIcon) {
         <div class="limit-dropdown-content">
             ${limitRow}
             <div class="limit-action-row">
-                <button class="remove-limit-btn"
-                    onclick="removeApp(this)">
+                <button class="remove-limit-btn" onclick="removeApp(this)">
                     🗑 Remove
                 </button>
                 <button class="action-limit-btn"
@@ -112,6 +116,67 @@ function buildCard(app, defaultIcon) {
 
     return details;
 }
+
+// ── Per-app limit inline editing ────────────────────────────────────────────
+
+function openAppLimitEdit(displayEl) {
+    const row = displayEl.closest('.app-limit-row');
+    const current = displayEl.textContent.trim();
+    const hMatch = current.match(/(\d+)\s*h/);
+    const mMatch = current.match(/(\d+)\s*m/);
+    row.querySelector('.app-limit-hours').value   = hMatch ? hMatch[1] : 0;
+    row.querySelector('.app-limit-minutes').value = mMatch ? mMatch[1] : 0;
+    displayEl.style.display = 'none';
+    row.querySelector('.app-limit-edit-row').style.display = 'flex';
+    row.querySelector('.app-limit-hours').focus();
+}
+
+function closeAppLimitEdit(btn) {
+    const row = btn.closest('.app-limit-row');
+    row.querySelector('.app-limit-edit-row').style.display = 'none';
+    row.querySelector('.app-limit-display').style.display = '';
+}
+
+async function saveAppLimit(btn) {
+    const row        = btn.closest('.app-limit-row');
+    const detailsEl  = btn.closest('details');
+    const app        = JSON.parse(detailsEl.dataset.app);
+    const h          = parseInt(row.querySelector('.app-limit-hours').value)   || 0;
+    const m          = parseInt(row.querySelector('.app-limit-minutes').value) || 0;
+    const limitStr   = `${h}h ${String(m).padStart(2, '0')}m`;
+
+    btn.textContent = '…';
+    btn.disabled    = true;
+
+    try {
+        const res  = await fetch('http://127.0.0.1:5000/update-app-limit', {
+            method:  'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ record_id: app.limit_record_id, limit: limitStr })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            row.querySelector('.app-limit-display').textContent = limitStr;
+            app.limit = limitStr;
+            detailsEl.dataset.app = JSON.stringify(app);
+            // Update the badge in the summary too
+            const badge = detailsEl.querySelector('.app-limit-badge');
+            if (badge) badge.textContent = limitStr;
+        } else {
+            console.error('saveAppLimit failed:', data.error);
+        }
+    } catch (e) {
+        console.error('saveAppLimit request failed:', e);
+    } finally {
+        btn.textContent = '✓';
+        btn.disabled    = false;
+        closeAppLimitEdit(btn);
+    }
+}
+
+window.openAppLimitEdit  = openAppLimitEdit;
+window.closeAppLimitEdit = closeAppLimitEdit;
+window.saveAppLimit      = saveAppLimit;
 
 // Remove an app — update Airtable then remove the card from the DOM
 async function removeApp(btn) {
@@ -177,65 +242,6 @@ function setCardBusy(detailsEl, busy) {
 }
 
 
-// ── Per-app limit inline editing ────────────────────────────────────────────
-
-function openAppLimitEdit(displayEl) {
-    const row = displayEl.closest('.app-limit-row');
-    const current = displayEl.textContent.trim();
-    const hMatch = current.match(/(\d+)\s*h/);
-    const mMatch = current.match(/(\d+)\s*m/);
-    row.querySelector('.app-limit-hours').value = hMatch ? hMatch[1] : 0;
-    row.querySelector('.app-limit-minutes').value = mMatch ? mMatch[1] : 0;
-    displayEl.style.display = 'none';
-    row.querySelector('.app-limit-edit-row').style.display = 'flex';
-    row.querySelector('.app-limit-hours').focus();
-}
-
-function closeAppLimitEdit(btn) {
-    const row = btn.closest('.app-limit-row');
-    row.querySelector('.app-limit-edit-row').style.display = 'none';
-    row.querySelector('.app-limit-display').style.display = '';
-}
-
-async function saveAppLimit(btn) {
-    const row = btn.closest('.app-limit-row');
-    const detailsEl = btn.closest('details');
-    const app = JSON.parse(detailsEl.dataset.app);
-
-    const h = parseInt(row.querySelector('.app-limit-hours').value) || 0;
-    const m = parseInt(row.querySelector('.app-limit-minutes').value) || 0;
-    const limitStr = `${h}h ${String(m).padStart(2, '0')}m`;
-
-    btn.textContent = '…';
-    btn.disabled = true;
-
-    try {
-        const res = await fetch('http://127.0.0.1:5000/update-app-limit', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ record_id: app.limit_record_id, limit: limitStr })
-        });
-        const data = await res.json();
-        if (data.ok) {
-            row.querySelector('.app-limit-display').textContent = limitStr;
-            app.limit = limitStr;
-            detailsEl.dataset.app = JSON.stringify(app);
-        } else {
-            console.error('saveAppLimit failed:', data.error);
-        }
-    } catch (e) {
-        console.error('saveAppLimit request failed:', e);
-    } finally {
-        btn.textContent = '✓';
-        btn.disabled = false;
-        closeAppLimitEdit(btn);
-    }
-}
-
-window.openAppLimitEdit = openAppLimitEdit;
-window.closeAppLimitEdit = closeAppLimitEdit;
-window.saveAppLimit = saveAppLimit;
-
 // ── Daily limit inline editing ──────────────────────────────────────────────
 
 function openLimitEdit() {
@@ -294,7 +300,11 @@ window.saveDailyLimit = saveDailyLimit;
 
 window.syncLimitFromAirtable = syncLimitFromAirtable;
 window.moveApp = moveApp;
-document.addEventListener('DOMContentLoaded', syncLimitFromAirtable);
+document.addEventListener('DOMContentLoaded', () => {
+    syncLimitFromAirtable();
+    // Re-sync every 60 seconds so Level & EXP stay current
+    setInterval(syncLimitFromAirtable, 60_000);
+});
 
 
 // ── Add App Modal ────────────────────────────────────────────────────────────
@@ -804,32 +814,29 @@ window.addNewTask = addNewTask;
 const XP_PER_LEVEL = 2000;
 
 const xpState = {
-    level: 11,
-    xp: 1487,
-    streak: 27,
+    level: 1,
+    xp: 0,
+    streak: 0,
     limitRewardedToday: false,
     streakRewardedSession: false,
+    seededFromAirtable: false,
 };
 
 function xpNeeded() {
-    // Scales slightly each level: 2000, 2200, 2400 …
     return XP_PER_LEVEL + (xpState.level - 1) * 200;
 }
 
 function addXP(amount, reason) {
-    if (amount <= 0) return;
+    // Never add XP before Airtable values are loaded
+    if (!xpState.seededFromAirtable || amount <= 0) return;
 
-    // Streak multiplier: every 7-day streak tier adds +10% XP
     const multiplier = 1 + Math.floor(xpState.streak / 7) * 0.10;
     const earned = Math.round(amount * multiplier);
-
     xpState.xp += earned;
 
     let levelledUp = false;
-    while (true) {
-        const needed = xpNeeded();
-        if (xpState.xp < needed) break;
-        xpState.xp -= needed;
+    while (xpState.xp >= xpNeeded()) {
+        xpState.xp -= xpNeeded();
         xpState.level++;
         levelledUp = true;
     }
@@ -837,6 +844,16 @@ function addXP(amount, reason) {
     renderXP();
     showXPBubble(earned, reason);
     if (levelledUp) triggerLevelUp();
+
+    // Persist updated level & XP to Airtable
+    fetch('http://127.0.0.1:5000/update-xp', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level: xpState.level, exp: xpState.xp })
+    })
+        .then(r => r.json())
+        .then(d => { if (!d.ok) console.error('update-xp error:', d); })
+        .catch(e => console.error('update-xp fetch failed:', e));
 }
 
 function renderXP() {
@@ -845,12 +862,12 @@ function renderXP() {
 
     const levelEl = document.getElementById('home-level-number');
     const xpValEl = document.getElementById('home-xp-val');
-    const fillEl = document.querySelector('.progress-fill');
+    const fillEl  = document.querySelector('.progress-fill');
     const streakEl = document.querySelector('.home-streak-val');
 
-    if (levelEl) levelEl.textContent = xpState.level;
-    if (xpValEl) xpValEl.textContent = `${xpState.xp} / ${needed}`;
-    if (fillEl) { fillEl.style.transition = 'width 0.6s cubic-bezier(.4,0,.2,1)'; fillEl.style.width = pct + '%'; }
+    if (levelEl)  levelEl.textContent  = xpState.level;
+    if (xpValEl)  xpValEl.textContent  = `${xpState.xp} / ${needed}`;
+    if (fillEl)   { fillEl.style.transition = 'width 0.6s cubic-bezier(.4,0,.2,1)'; fillEl.style.width = pct + '%'; }
     if (streakEl) streakEl.textContent = xpState.streak + ' days';
 }
 
@@ -898,9 +915,7 @@ function awardStreakBonus() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    renderXP();
-    // Small delay so the bar animates in on load
-    setTimeout(awardStreakBonus, 800);
+    // renderXP is called after Airtable sync sets real values
 });
 
 window.addXP = addXP;

@@ -21,11 +21,28 @@ api = Api(AIRTABLE_API_KEY)
 
 HEADERS = {"Authorization": f"Bearer {AIRTABLE_API_KEY}"}
 
-APP_LIMITS_TABLE = os.getenv("APP_LIMITS_TABLE", "App_limits")
+APP_LIMITS_TABLE  = os.getenv("APP_LIMITS_TABLE",  "App_limits")
+APP_USETIME_TABLE = os.getenv("APP_USETIME_TABLE", "App_usetime")
 
-main_table = api.table(BASE_ID, USERS_TABLE)
-apps_table = api.table(BASE_ID, APPS_TABLE)
-app_limits_table = api.table(BASE_ID, APP_LIMITS_TABLE)
+main_table        = api.table(BASE_ID, USERS_TABLE)
+apps_table        = api.table(BASE_ID, APPS_TABLE)
+app_limits_table  = api.table(BASE_ID, APP_LIMITS_TABLE)
+app_usetime_table = api.table(BASE_ID, APP_USETIME_TABLE)
+
+
+def build_usetime_map():
+    """Return a dict of app_record_id -> time string for the current user."""
+    usetime_map = {}
+    try:
+        records = app_usetime_table.all()
+        for rec in records:
+            f = rec.get('fields', {})
+            if USER_RECORD_ID in f.get('User', []):
+                for aid in f.get('Apps', []):
+                    usetime_map[aid] = f.get('Time', '')
+    except Exception as e:
+        print(f"Could not fetch App_usetime: {e}")
+    return usetime_map
 
 @app.route('/sync', methods=['GET'])
 def sync_data():
@@ -42,7 +59,7 @@ def sync_data():
         fields = data.get('fields', {})
 
 
-        # 3. Fetch App_limits for this user and build a lookup map
+        # 3. Fetch App_limits and App_usetime for this user
         limit_map = {}  # app_record_id -> {limit, limit_record_id}
         try:
             limit_records = app_limits_table.all()
@@ -51,11 +68,13 @@ def sync_data():
                 if USER_RECORD_ID in f.get('User', []):
                     for aid in f.get('App', []):
                         limit_map[aid] = {
-                            "limit": f.get("Limit", ""),
+                            "limit":           f.get("Limit", ""),
                             "limit_record_id": rec['id']
                         }
         except Exception as e:
             print(f"Could not fetch App_limits: {e}")
+
+        usetime_map = build_usetime_map()
 
         # 4. Define the formatter
         def get_app_details(record_ids, include_limits=False):
@@ -65,21 +84,20 @@ def sync_data():
             detailed_list = []
             for rec_id in record_ids:
                 try:
-                    app_rec = apps_table.get(rec_id)
+                    app_rec    = apps_table.get(rec_id)
                     app_fields = app_rec.get('fields', {})
-
-                    logo_data = app_fields.get('Logo', [])
-                    logo_url = logo_data[0].get('url') if logo_data else ""
+                    logo_data  = app_fields.get('Logo', [])
+                    logo_url   = logo_data[0].get('url') if logo_data else ""
 
                     entry = {
                         "id":   rec_id,
                         "name": app_fields.get("Apps", "Unknown"),
                         "logo": logo_url,
-                        "time": app_fields.get("UsageTime", "0m")
+                        "time": usetime_map.get(rec_id, app_fields.get("UsageTime", "0m"))
                     }
                     if include_limits:
                         lim = limit_map.get(rec_id, {})
-                        entry["limit"] = lim.get("limit", "")
+                        entry["limit"]           = lim.get("limit", "")
                         entry["limit_record_id"] = lim.get("limit_record_id", "")
                     detailed_list.append(entry)
                 except Exception as e:
@@ -89,17 +107,19 @@ def sync_data():
 
         # 5. Create a plain Python dictionary (The Payload)
         payload = {
-            "today_time": fields.get("Screentime_today", "0h 00m"),
-            "daily_limit": fields.get("Screen_time_limit", "0h 00m"),
-            "weekly_total": fields.get("Screentime_this_week", "0h 00m"),
+            "today_time":   fields.get("Screentime_today",    "0h 00m"),
+            "daily_limit":  fields.get("Screen_time_limit",   "0h 00m"),
+            "weekly_total": fields.get("Screentime_this_week","0h 00m"),
             "blocked_apps": get_app_details(fields.get("Blocked_apps", [])),
-            "limited_apps": get_app_details(fields.get("limited_apps", []), include_limits=True)
+            "limited_apps": get_app_details(fields.get("limited_apps", []), include_limits=True),
+            "level":        fields.get("Level", 1),
+            "exp":          fields.get("EXP",   0)
         }
 
-        # 6. Print the payload (not the response object) for debugging
+        # 5. Print the payload (not the response object) for debugging
         print(f"Sending to Electron: {payload}")
 
-        # 7. Send it back as JSON
+        # 6. Send it back as JSON
         return jsonify(payload)
 
     except Exception as e:
@@ -166,6 +186,29 @@ def remove_app():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/update-xp', methods=['PATCH'])
+def update_xp():
+    try:
+        body = request.get_json()
+        new_level = body.get('level')
+        new_exp   = body.get('exp')
+        if new_level is None or new_exp is None:
+            return jsonify({"error": "Missing level or exp"}), 400
+
+        resp = requests.patch(
+            f"https://api.airtable.com/v0/{BASE_ID}/{USERS_TABLE}/{USER_RECORD_ID}",
+            headers={**HEADERS, "Content-Type": "application/json"},
+            json={"fields": {"Level": str(new_level), "EXP": str(new_exp)}}
+        )
+        print(f"update-xp Airtable response {resp.status_code}: {resp.text}")
+        if not resp.ok:
+            return jsonify({"error": resp.text}), 500
+        return jsonify({"ok": True})
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/update-limit', methods=['PATCH'])
 def update_limit():
     try:
@@ -180,25 +223,11 @@ def update_limit():
         print(f"update-limit ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/update-app-limit', methods=['PATCH'])
-def update_app_limit():
-    try:
-        body = request.get_json()
-        record_id = body.get('record_id')
-        new_limit = body.get('limit', '').strip()
-        if not record_id or not new_limit:
-            return jsonify({"error": "Invalid payload"}), 400
-        app_limits_table.update(record_id, {"Limit": new_limit})
-        return jsonify({"ok": True, "limit": new_limit})
-    except Exception as e:
-        print(f"update-app-limit ERROR: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-
 @app.route('/get-apps', methods=['GET'])
 def get_apps():
-    """Return all apps from the Apps table."""
+    """Return all apps from the Apps table with usetime from App_usetime."""
     try:
+        usetime_map = build_usetime_map()
         records = apps_table.all()
         result = []
         for rec in records:
@@ -209,11 +238,26 @@ def get_apps():
                 "id":   rec['id'],
                 "name": f.get("Apps", "Unknown"),
                 "logo": logo_url,
-                "time": f.get("UsageTime", "0m")
+                "time": usetime_map.get(rec['id'], f.get("UsageTime", "0m"))
             })
         return jsonify(result)
     except Exception as e:
         print(f"get-apps ERROR: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/update-app-limit', methods=['PATCH'])
+def update_app_limit():
+    try:
+        body      = request.get_json()
+        record_id = body.get('record_id')
+        new_limit = body.get('limit', '').strip()
+        if not record_id or not new_limit:
+            return jsonify({"error": "Invalid payload"}), 400
+        app_limits_table.update(record_id, {"Limit": new_limit})
+        return jsonify({"ok": True, "limit": new_limit})
+    except Exception as e:
+        print(f"update-app-limit ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 
