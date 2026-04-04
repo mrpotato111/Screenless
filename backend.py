@@ -22,10 +22,27 @@ api = Api(AIRTABLE_API_KEY)
 HEADERS = {"Authorization": f"Bearer {AIRTABLE_API_KEY}"}
 
 APP_LIMITS_TABLE = os.getenv("APP_LIMITS_TABLE", "App_limits")
+APP_USETIME_TABLE = os.getenv("APP_USETIME_TABLE", "App_usetime")
 
 main_table = api.table(BASE_ID, USERS_TABLE)
 apps_table = api.table(BASE_ID, APPS_TABLE)
 app_limits_table = api.table(BASE_ID, APP_LIMITS_TABLE)
+app_usetime_table = api.table(BASE_ID, APP_USETIME_TABLE)
+
+
+def build_usetime_map():
+    """Return a dict of app_record_id -> time string for the current user."""
+    usetime_map = {}
+    try:
+        records = app_usetime_table.all()
+        for rec in records:
+            f = rec.get('fields', {})
+            if USER_RECORD_ID in f.get('User', []):
+                for aid in f.get('Apps', []):
+                    usetime_map[aid] = f.get('Time', '')
+    except Exception as e:
+        print(f"Could not fetch App_usetime: {e}")
+    return usetime_map
 
 @app.route('/sync', methods=['GET'])
 def sync_data():
@@ -42,7 +59,7 @@ def sync_data():
         fields = data.get('fields', {})
 
 
-        # 3. Fetch App_limits for this user and build a lookup map
+        # 3. Fetch App_limits and App_usetime for this user
         limit_map = {}  # app_record_id -> {limit, limit_record_id}
         try:
             limit_records = app_limits_table.all()
@@ -56,6 +73,8 @@ def sync_data():
                         }
         except Exception as e:
             print(f"Could not fetch App_limits: {e}")
+
+        usetime_map = build_usetime_map()
 
         # 4. Define the formatter
         def get_app_details(record_ids, include_limits=False):
@@ -75,7 +94,7 @@ def sync_data():
                         "id":   rec_id,
                         "name": app_fields.get("Apps", "Unknown"),
                         "logo": logo_url,
-                        "time": app_fields.get("UsageTime", "0m")
+                        "time": usetime_map.get(rec_id, app_fields.get("UsageTime", "0m"))
                     }
                     if include_limits:
                         lim = limit_map.get(rec_id, {})
@@ -197,8 +216,9 @@ def update_app_limit():
 
 @app.route('/get-apps', methods=['GET'])
 def get_apps():
-    """Return all apps from the Apps table."""
+    """Return all apps from the Apps table with usetime from App_usetime."""
     try:
+        usetime_map = build_usetime_map()
         records = apps_table.all()
         result = []
         for rec in records:
@@ -209,7 +229,7 @@ def get_apps():
                 "id":   rec['id'],
                 "name": f.get("Apps", "Unknown"),
                 "logo": logo_url,
-                "time": f.get("UsageTime", "0m")
+                "time": usetime_map.get(rec['id'], f.get("UsageTime", "0m"))
             })
         return jsonify(result)
     except Exception as e:
