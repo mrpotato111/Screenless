@@ -23,11 +23,13 @@ HEADERS = {"Authorization": f"Bearer {AIRTABLE_API_KEY}"}
 
 APP_LIMITS_TABLE = os.getenv("APP_LIMITS_TABLE", "App_limits")
 APP_USETIME_TABLE = os.getenv("APP_USETIME_TABLE", "App_usetime")
+ACTIVITIES_TABLE = os.getenv("ACTIVITIES_TABLE", "Activities")
 
 main_table = api.table(BASE_ID, USERS_TABLE)
 apps_table = api.table(BASE_ID, APPS_TABLE)
 app_limits_table = api.table(BASE_ID, APP_LIMITS_TABLE)
 app_usetime_table = api.table(BASE_ID, APP_USETIME_TABLE)
+activities_table = api.table(BASE_ID, ACTIVITIES_TABLE)
 
 
 def build_usetime_map():
@@ -269,6 +271,64 @@ def add_app():
         return jsonify({"ok": True})
     except Exception as e:
         print(f"add-app ERROR: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/usetime', methods=['GET'])
+def get_usetime():
+    """Return all apps with usage time for the current user, with limits if any."""
+    try:
+        # Build limit map: app_record_id -> limit string
+        limit_map = {}
+        try:
+            for rec in app_limits_table.all():
+                f = rec.get('fields', {})
+                if USER_RECORD_ID in f.get('User', []):
+                    for aid in f.get('App', []):
+                        limit_map[aid] = f.get('Limit', '')
+        except Exception as e:
+            print(f"Could not fetch App_limits for usetime: {e}")
+
+        result = []
+        records = app_usetime_table.all()
+        for rec in records:
+            f = rec.get('fields', {})
+            if USER_RECORD_ID not in f.get('User', []):
+                continue
+            time_val = f.get('Time', '0m')
+            for aid in f.get('Apps', []):
+                try:
+                    app_rec = apps_table.get(aid)
+                    app_fields = app_rec.get('fields', {})
+                    result.append({
+                        "name":  app_fields.get("Apps", "Unknown"),
+                        "time":  time_val,
+                        "limit": limit_map.get(aid, ''),
+                    })
+                except Exception as e:
+                    print(f"Skipping app {aid} in usetime: {e}")
+        return jsonify(result)
+    except Exception as e:
+        print(f"get-usetime ERROR: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/activities', methods=['GET'])
+def get_activities():
+    """Return all activities from the Activities table."""
+    try:
+        records = activities_table.all()
+        result = []
+        for rec in records:
+            f = rec.get('fields', {})
+            result.append({
+                "name":     f.get("Name", "Unknown"),
+                "length":   f.get("Length", ""),
+                "division": f.get("division", ""),
+            })
+        return jsonify(result)
+    except Exception as e:
+        print(f"get-activities ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 

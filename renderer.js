@@ -26,6 +26,7 @@ async function syncLimitFromAirtable() {
         buildList('blocked-apps-container', data.blocked_apps || [], '🚫');
         buildList('limited-apps-container', data.limited_apps || [], '🕒');
 
+        renderDailyOverview(data.limited_apps || [], data.blocked_apps || []);
         fetchMostUsedApps();
         updateWeeklyReport(data.weekly_total);
         checkScreenTimeLimitXP(data.today_time, data.daily_limit);
@@ -111,6 +112,37 @@ function buildCard(app, defaultIcon) {
         </div>`;
 
     return details;
+}
+
+function renderDailyOverview(limitedApps, blockedApps) {
+    const body = document.getElementById('daily-overview-body');
+    if (!body) return;
+
+    const allApps = [...(limitedApps || []), ...(blockedApps || [])];
+    body.innerHTML = '';
+
+    if (allApps.length === 0) {
+        body.innerHTML = '<div class="table-row"><span class="col-main" style="color:var(--text-dim);">No apps tracked</span></div>';
+        return;
+    }
+
+    allApps.forEach((app, idx) => {
+        const isLast = idx === allApps.length - 1;
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        if (isLast) row.style.borderBottom = 'none';
+
+        const logoHtml = app.logo
+            ? `<img src="${app.logo}" style="width:18px;height:18px;border-radius:4px;margin-right:8px;vertical-align:middle;">`
+            : `<svg width="13" height="13" style="color:var(--accent-green);margin-right:8px;vertical-align:middle"><use href="#ic-smartphone"/></svg>`;
+
+        row.innerHTML = `
+            <span class="col-main" style="display:flex;align-items:center;">
+                ${logoHtml}${app.name}
+            </span>
+            <span class="col-usage">${app.time || '0m'}</span>`;
+        body.appendChild(row);
+    });
 }
 
 // Remove an app — update Airtable then remove the card from the DOM
@@ -624,7 +656,7 @@ function toggleGoalDone() {
     const text = document.getElementById('daily-goal-text').textContent;
     syncGoalToHome(text, goalDone);
 }
-function toggleHomeGoal(el) {
+function toggleHomeGoal() {
     // Mirror the done state back to settings
     goalDone = !goalDone;
     document.getElementById('daily-goal-display').classList.toggle('done', goalDone);
@@ -1040,3 +1072,75 @@ window.toggleReminderById = toggleReminderById;
 window.deleteReminder = deleteReminder;
 window.selectReminderCat = selectReminderCat;
 window.addNewReminder = addNewReminder;
+
+// ── Activities ────────────────────────────────────────────────────────────────
+
+const DIVISION_EMOJI = {
+    'motivation':       '🎯',
+    'cleaning':         '🧹',
+    'exercise':         '🏃',
+    'self improvement': '📚',
+    'health':           '💤',
+    'relaxing':         '🎵',
+};
+
+let activitiesState = []; // { name, length, division, done }
+
+function renderActivities() {
+    const list = document.getElementById('activities-list');
+    const badge = document.getElementById('activities-done-badge');
+    if (!list) return;
+
+    list.innerHTML = '';
+    const doneCount = activitiesState.filter(a => a.done).length;
+
+    if (badge) {
+        badge.textContent = doneCount > 0 ? `${doneCount} Done` : '';
+        badge.style.display = doneCount > 0 ? '' : 'none';
+    }
+
+    activitiesState.forEach((act, idx) => {
+        const emoji = DIVISION_EMOJI[act.division.toLowerCase()] || '⭐';
+        const isLast = idx === activitiesState.length - 1;
+        const row = document.createElement('div');
+        row.className = 'settings-activity-row';
+        if (isLast) row.style.cssText = 'border-bottom:none;margin-bottom:0;';
+        row.style.cursor = 'pointer';
+        row.innerHTML = `
+            <div class="settings-act-check${act.done ? ' done' : ''}" style="font-size:1.1rem;width:26px;height:26px;display:flex;align-items:center;justify-content:center;">
+                ${act.done
+                    ? `<svg width="12" height="12"><use href="#ic-check"/></svg>`
+                    : emoji}
+            </div>
+            <div class="settings-act-info">
+                <div class="settings-act-name">${act.name}</div>
+                <div class="settings-act-meta">${act.length}${act.done ? ' · Completed' : ''}</div>
+            </div>`;
+        row.onclick = () => toggleActivity(idx);
+        list.appendChild(row);
+    });
+}
+
+function toggleActivity(idx) {
+    if (activitiesState[idx].done) return;
+    activitiesState[idx].done = true;
+    addXP(50, 'Activity completed');
+    renderActivities();
+}
+
+async function fetchActivities() {
+    try {
+        const res = await fetch('http://127.0.0.1:5000/activities');
+        const data = await res.json();
+        if (Array.isArray(data)) {
+            activitiesState = data.map(a => ({ ...a, done: false }));
+            renderActivities();
+        }
+    } catch (e) {
+        console.error('fetchActivities error:', e);
+        const list = document.getElementById('activities-list');
+        if (list) list.innerHTML = '<p class="sub-text" style="margin:8px 0;">Could not load activities.</p>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', fetchActivities);
