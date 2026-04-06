@@ -1,10 +1,15 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/index.py", "use": "@vercel/python" }
+    { "src": "api/index.py", "use": "@vercel/python" },
+    { "src": "index.html",   "use": "@vercel/static" },
+    { "src": "renderer.js",  "use": "@vercel/static" },
+    { "src": "style.css",    "use": "@vercel/static" },
+    { "src": "logo_ring.png","use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.py" },
-    { "src": "/(.*)",     "dest": "/$1" }
+    { "src": "/",         "dest": "/index.html"   },
+    { "src": "/(.*)",     "dest": "/$1"           }
   ]
 }
