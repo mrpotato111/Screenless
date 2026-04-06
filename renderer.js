@@ -26,10 +26,17 @@ async function syncLimitFromAirtable() {
         buildList('blocked-apps-container', data.blocked_apps || [], '🚫');
         buildList('limited-apps-container', data.limited_apps || [], '🕒');
 
-        renderDailyOverview(data.limited_apps || [], data.blocked_apps || []);
+        // Set Level & EXP from Airtable — only on first load, not on polls
+        // (polls would overwrite XP earned in-session before the write confirms)
+        if (data.level !== undefined && data.exp !== undefined && !xpState.seededFromAirtable) {
+            xpState.level = Number(data.level);
+            xpState.xp    = Number(data.exp);
+            xpState.seededFromAirtable = true;
+            renderXP();
+        }
+
         fetchMostUsedApps();
         updateWeeklyReport(data.weekly_total);
-        checkScreenTimeLimitXP(data.today_time, data.daily_limit);
 
     } catch (e) {
         console.error("Fetch failed entirely:", e);
@@ -114,33 +121,53 @@ function buildCard(app, defaultIcon) {
     return details;
 }
 
-function renderDailyOverview(limitedApps, blockedApps) {
+function renderDailyOverview(apps) {
     const body = document.getElementById('daily-overview-body');
     if (!body) return;
 
-    const allApps = [...(limitedApps || []), ...(blockedApps || [])];
     body.innerHTML = '';
 
-    if (allApps.length === 0) {
+    if (!apps || apps.length === 0) {
         body.innerHTML = '<div class="table-row"><span class="col-main" style="color:var(--text-dim);">No apps tracked</span></div>';
         return;
     }
 
-    allApps.forEach((app, idx) => {
-        const isLast = idx === allApps.length - 1;
+    apps = apps.filter(app => {
+        const mins = parseMinutes(app.time);
+        return mins !== null && mins > 0;
+    });
+
+    if (apps.length === 0) {
+        body.innerHTML = '<div class="table-row"><span class="col-main" style="color:var(--text-dim);">No usage today</span></div>';
+        return;
+    }
+
+    apps.forEach((app, idx) => {
+        const isLast = idx === apps.length - 1;
         const row = document.createElement('div');
         row.className = 'table-row';
         if (isLast) row.style.borderBottom = 'none';
 
         const logoHtml = app.logo
-            ? `<img src="${app.logo}" style="width:18px;height:18px;border-radius:4px;margin-right:8px;vertical-align:middle;">`
-            : `<svg width="13" height="13" style="color:var(--accent-green);margin-right:8px;vertical-align:middle"><use href="#ic-smartphone"/></svg>`;
+            ? `<img src="${app.logo}" style="width:20px;height:20px;border-radius:5px;margin-right:10px;flex-shrink:0;">`
+            : `<svg width="20" height="20" style="color:var(--text-dim);margin-right:10px;flex-shrink:0;"><use href="#ic-smartphone"/></svg>`;
+
+        const usageMin = parseMinutes(app.time);
+        const limitMin = parseMinutes(app.limit);
+        const exceeded = usageMin !== null && limitMin !== null && usageMin > limitMin;
+
+        if (exceeded) row.classList.add('exceeded');
+
+        const limitDisplay = app.limit
+            ? `<span class="${exceeded ? 'ov-limit-exceeded' : 'ov-limit'}">${app.limit}</span>`
+            : `<span class="ov-limit-none">—</span>`;
 
         row.innerHTML = `
-            <span class="col-main" style="display:flex;align-items:center;">
-                ${logoHtml}${app.name}
+            <span class="col-main">
+                ${logoHtml}<span class="ov-app-name">${app.name}</span>
             </span>
-            <span class="col-usage">${app.time || '0m'}</span>`;
+            <span class="col-usage ov-usage">${app.time || '0m'}</span>
+            <span class="col-limit">${limitDisplay}</span>`;
         body.appendChild(row);
     });
 }
@@ -453,6 +480,7 @@ async function fetchMostUsedApps() {
         if (!apps.error) {
             cachedApps = apps;
             buildMostUsedGrid(apps, 'most-used-grid', false);
+            renderDailyOverview(apps);
         }
     } catch (e) { console.error('fetchMostUsedApps failed:', e); }
 }
@@ -836,11 +864,12 @@ window.addNewTask = addNewTask;
 const XP_PER_LEVEL = 2000;
 
 const xpState = {
-    level: 11,
-    xp: 1487,
-    streak: 27,
+    level: 1,
+    xp: 0,
+    streak: 0,
     limitRewardedToday: false,
     streakRewardedSession: false,
+    seededFromAirtable: false,
 };
 
 function xpNeeded() {
@@ -849,19 +878,16 @@ function xpNeeded() {
 }
 
 function addXP(amount, reason) {
-    if (amount <= 0) return;
+    // Never add XP before Airtable values are loaded
+    if (!xpState.seededFromAirtable || amount <= 0) return;
 
-    // Streak multiplier: every 7-day streak tier adds +10% XP
     const multiplier = 1 + Math.floor(xpState.streak / 7) * 0.10;
     const earned = Math.round(amount * multiplier);
-
     xpState.xp += earned;
 
     let levelledUp = false;
-    while (true) {
-        const needed = xpNeeded();
-        if (xpState.xp < needed) break;
-        xpState.xp -= needed;
+    while (xpState.xp >= xpNeeded()) {
+        xpState.xp -= xpNeeded();
         xpState.level++;
         levelledUp = true;
     }
@@ -869,6 +895,16 @@ function addXP(amount, reason) {
     renderXP();
     showXPBubble(earned, reason);
     if (levelledUp) triggerLevelUp();
+
+    // Persist updated level & XP to Airtable
+    fetch('http://127.0.0.1:5000/update-xp', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level: xpState.level, exp: xpState.xp })
+    })
+        .then(r => r.json())
+        .then(d => { if (!d.ok) console.error('update-xp error:', d); })
+        .catch(e => console.error('update-xp fetch failed:', e));
 }
 
 function renderXP() {
@@ -930,9 +966,7 @@ function awardStreakBonus() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    renderXP();
-    // Small delay so the bar animates in on load
-    setTimeout(awardStreakBonus, 800);
+    // renderXP is called after Airtable sync sets real values
 });
 
 window.addXP = addXP;

@@ -298,7 +298,7 @@ header {
 .table-row {
     display: flex;
     align-items: center;
-    padding: 15px 20px;
+    padding: 11px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -316,6 +316,37 @@ header {
 .col-limit {
     flex: 1;
     text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.ov-app-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary, #fff);
+}
+
+.ov-usage {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+.ov-limit {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+.ov-limit-exceeded {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--danger-red, #ff5252);
+}
+
+.ov-limit-none {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    opacity: 0.4;
 }
 
 .pill {

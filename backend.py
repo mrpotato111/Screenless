@@ -114,7 +114,9 @@ def sync_data():
             "daily_limit": fields.get("Screen_time_limit", "0h 00m"),
             "weekly_total": fields.get("Screentime_this_week", "0h 00m"),
             "blocked_apps": get_app_details(fields.get("Blocked_apps", [])),
-            "limited_apps": get_app_details(fields.get("limited_apps", []), include_limits=True)
+            "limited_apps": get_app_details(fields.get("limited_apps", []), include_limits=True),
+            "level":  fields.get("Level", 1),
+            "exp":    fields.get("EXP",   0),
         }
 
         # 6. Print the payload (not the response object) for debugging
@@ -201,6 +203,29 @@ def update_limit():
         print(f"update-limit ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/update-xp', methods=['PATCH'])
+def update_xp():
+    try:
+        body = request.get_json()
+        new_level = body.get('level')
+        new_exp   = body.get('exp')
+        if new_level is None or new_exp is None:
+            return jsonify({"error": "Missing level or exp"}), 400
+
+        resp = requests.patch(
+            f"https://api.airtable.com/v0/{BASE_ID}/{USERS_TABLE}/{USER_RECORD_ID}",
+            headers={**HEADERS, "Content-Type": "application/json"},
+            json={"fields": {"Level": str(new_level), "EXP": str(new_exp)}}
+        )
+        print(f"update-xp Airtable response {resp.status_code}: {resp.text}")
+        if not resp.ok:
+            return jsonify({"error": resp.text}), 500
+        return jsonify({"ok": True})
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/update-app-limit', methods=['PATCH'])
 def update_app_limit():
     try:
@@ -218,9 +243,21 @@ def update_app_limit():
 
 @app.route('/get-apps', methods=['GET'])
 def get_apps():
-    """Return all apps from the Apps table with usetime from App_usetime."""
+    """Return all apps from the Apps table with usetime and per-app limits."""
     try:
         usetime_map = build_usetime_map()
+
+        # Build limit map for this user: app_record_id -> limit string
+        limit_map = {}
+        try:
+            for rec in app_limits_table.all():
+                f = rec.get('fields', {})
+                if USER_RECORD_ID in f.get('User', []):
+                    for aid in f.get('App', []):
+                        limit_map[aid] = f.get('Limit', '')
+        except Exception as e:
+            print(f"Could not fetch App_limits for get-apps: {e}")
+
         records = apps_table.all()
         result = []
         for rec in records:
@@ -228,10 +265,11 @@ def get_apps():
             logo_data = f.get('Logo', [])
             logo_url = logo_data[0].get('url') if logo_data else ""
             result.append({
-                "id":   rec['id'],
-                "name": f.get("Apps", "Unknown"),
-                "logo": logo_url,
-                "time": usetime_map.get(rec['id'], f.get("UsageTime", "0m"))
+                "id":    rec['id'],
+                "name":  f.get("Apps", "Unknown"),
+                "logo":  logo_url,
+                "time":  usetime_map.get(rec['id'], f.get("UsageTime", "0m")),
+                "limit": limit_map.get(rec['id'], '')
             })
         return jsonify(result)
     except Exception as e:
