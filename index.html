@@ -154,7 +154,7 @@
     <div id="screen-home" class="screen active">
       <header class="main-header">
         <div class="logo-box">
-          <div class="logo-circle"><img src="sl.png" alt="Screenless"
+          <div class="logo-circle"><img src="logo_ring.png" alt="Screenless"
               style="width:26px;height:26px;border-radius:50%;object-fit:cover;"></div>
           <span>Screenless</span>
         </div>
@@ -258,7 +258,7 @@
             <use href="#ic-back" />
           </svg>
         </span>
-        <div class="logo-circle"><img src="sl.png" alt="Screenless"
+        <div class="logo-circle"><img src="logo_ring.png" alt="Screenless"
             style="width:26px;height:26px;border-radius:50%;object-fit:cover;"></div>
         <div class="profile-icon" onclick="showScreen('screen-settings')">
           <svg class="nav-svg">
@@ -389,23 +389,8 @@
           <span class="col-usage">Usage</span>
           <span class="col-limit">Limit</span>
         </div>
-        <div class="table-row">
-          <span class="col-main">
-            <svg width="13" height="13" style="color:var(--accent-green);margin-right:6px;vertical-align:middle">
-              <use href="#ic-play" />
-            </svg>YouTube
-          </span>
-          <span class="col-usage">25m</span>
-          <span class="col-limit pill">30m</span>
-        </div>
-        <div class="table-row exceeded">
-          <span class="col-main">
-            <svg width="13" height="13" style="color:var(--danger-red);margin-right:6px;vertical-align:middle">
-              <use href="#ic-alert" />
-            </svg>Twitter
-          </span>
-          <span class="col-usage">45m</span>
-          <span class="col-limit pill alert">30m</span>
+        <div id="daily-overview-body">
+          <div class="table-row"><span class="col-main" style="color:var(--text-dim);">Loading…</span></div>
         </div>
       </div>
     </div>
@@ -417,7 +402,7 @@
             <use href="#ic-back" />
           </svg>
         </span>
-        <div class="logo-circle"><img src="sl.png" alt="Screenless"
+        <div class="logo-circle"><img src="logo_ring.png" alt="Screenless"
             style="width:26px;height:26px;border-radius:50%;object-fit:cover;"></div>
         <div class="profile-icon" onclick="showScreen('screen-settings')">
           <svg class="nav-svg">
@@ -575,38 +560,15 @@
             </div>
             <div>
               <span class="label-text">Activities</span>
-              <span class="settings-badge settings-badge-green">2 Done</span>
+              <span class="settings-badge settings-badge-green" id="activities-done-badge"></span>
             </div>
           </div>
           <svg width="16" height="16" class="settings-chevron" style="color:var(--text-dim)">
             <use href="#ic-chevron-right" />
           </svg>
         </summary>
-        <div class="settings-dropdown-body">
-          <div class="settings-activity-row">
-            <div class="settings-act-check done">
-              <svg width="12" height="12">
-                <use href="#ic-check" />
-              </svg>
-            </div>
-            <div class="settings-act-info">
-              <div class="settings-act-name">Today's Exercise</div>
-              <div class="settings-act-meta">30 min · Completed</div>
-            </div>
-            <div class="settings-act-xp">+50 XP</div>
-          </div>
-          <div class="settings-activity-row" style="border-bottom:none;margin-bottom:0;">
-            <div class="settings-act-check done">
-              <svg width="12" height="12">
-                <use href="#ic-check" />
-              </svg>
-            </div>
-            <div class="settings-act-info">
-              <div class="settings-act-name">Reading Session</div>
-              <div class="settings-act-meta">45 min · Completed</div>
-            </div>
-            <div class="settings-act-xp">+75 XP</div>
-          </div>
+        <div class="settings-dropdown-body" id="activities-list">
+          <p class="sub-text" style="margin:8px 0;">Loading activities…</p>
         </div>
       </details>
 

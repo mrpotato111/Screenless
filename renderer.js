@@ -26,9 +26,17 @@ async function syncLimitFromAirtable() {
         buildList('blocked-apps-container', data.blocked_apps || [], '🚫');
         buildList('limited-apps-container', data.limited_apps || [], '🕒');
 
+        // Set Level & EXP from Airtable — only on first load, not on polls
+        // (polls would overwrite XP earned in-session before the write confirms)
+        if (data.level !== undefined && data.exp !== undefined && !xpState.seededFromAirtable) {
+            xpState.level = Number(data.level);
+            xpState.xp    = Number(data.exp);
+            xpState.seededFromAirtable = true;
+            renderXP();
+        }
+
         fetchMostUsedApps();
         updateWeeklyReport(data.weekly_total);
-        checkScreenTimeLimitXP(data.today_time, data.daily_limit);
 
     } catch (e) {
         console.error("Fetch failed entirely:", e);
@@ -69,15 +77,35 @@ function buildCard(app, defaultIcon) {
     details.dataset.app = JSON.stringify(app);
     details.dataset.icon = defaultIcon;
 
+    const limitRow = !isBlocked ? `
+        <div class="app-limit-row">
+            <span class="app-limit-label">Time limit:</span>
+            <span class="app-limit-display" onclick="openAppLimitEdit(this)">${app.limit || 'Not set'}</span>
+            <div class="app-limit-edit-row" style="display:none;">
+                <input type="number" class="app-limit-hours" min="0" max="23" placeholder="0">h
+                <input type="number" class="app-limit-minutes" min="0" max="59" placeholder="0">m
+                <button class="limit-save-btn" onclick="saveAppLimit(this)">✓</button>
+                <button class="limit-cancel-btn" onclick="closeAppLimitEdit(this)">✕</button>
+            </div>
+        </div>` : '';
+
+    const limitBadge = !isBlocked && app.limit
+        ? `<span class="app-limit-badge">${app.limit}</span>`
+        : '';
+
     details.innerHTML = `
         <summary class="limit-summary">
             <div class="card-left">
                 ${iconHtml}
                 <span class="label-text">${app.name}</span>
             </div>
-            <span class="icon-red limit-status-icon">${statusIcon}</span>
+            <div class="card-right">
+                ${limitBadge}
+                <span class="icon-red limit-status-icon">${statusIcon}</span>
+            </div>
         </summary>
         <div class="limit-dropdown-content">
+            ${limitRow}
             <div class="limit-action-row">
                 <button class="remove-limit-btn"
                     onclick="removeApp(this)">
@@ -91,6 +119,57 @@ function buildCard(app, defaultIcon) {
         </div>`;
 
     return details;
+}
+
+function renderDailyOverview(apps) {
+    const body = document.getElementById('daily-overview-body');
+    if (!body) return;
+
+    body.innerHTML = '';
+
+    if (!apps || apps.length === 0) {
+        body.innerHTML = '<div class="table-row"><span class="col-main" style="color:var(--text-dim);">No apps tracked</span></div>';
+        return;
+    }
+
+    apps = apps.filter(app => {
+        const mins = parseMinutes(app.time);
+        return mins !== null && mins > 0;
+    });
+
+    if (apps.length === 0) {
+        body.innerHTML = '<div class="table-row"><span class="col-main" style="color:var(--text-dim);">No usage today</span></div>';
+        return;
+    }
+
+    apps.forEach((app, idx) => {
+        const isLast = idx === apps.length - 1;
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        if (isLast) row.style.borderBottom = 'none';
+
+        const logoHtml = app.logo
+            ? `<img src="${app.logo}" style="width:20px;height:20px;border-radius:5px;margin-right:10px;flex-shrink:0;">`
+            : `<svg width="20" height="20" style="color:var(--text-dim);margin-right:10px;flex-shrink:0;"><use href="#ic-smartphone"/></svg>`;
+
+        const usageMin = parseMinutes(app.time);
+        const limitMin = parseMinutes(app.limit);
+        const exceeded = usageMin !== null && limitMin !== null && usageMin > limitMin;
+
+        if (exceeded) row.classList.add('exceeded');
+
+        const limitDisplay = app.limit
+            ? `<span class="${exceeded ? 'ov-limit-exceeded' : 'ov-limit'}">${app.limit}</span>`
+            : `<span class="ov-limit-none">—</span>`;
+
+        row.innerHTML = `
+            <span class="col-main">
+                ${logoHtml}<span class="ov-app-name">${app.name}</span>
+            </span>
+            <span class="col-usage ov-usage">${app.time || '0m'}</span>
+            <span class="col-limit">${limitDisplay}</span>`;
+        body.appendChild(row);
+    });
 }
 
 // Remove an app — update Airtable then remove the card from the DOM
@@ -156,6 +235,65 @@ function setCardBusy(detailsEl, busy) {
     });
 }
 
+
+// ── Per-app limit inline editing ────────────────────────────────────────────
+
+function openAppLimitEdit(displayEl) {
+    const row = displayEl.closest('.app-limit-row');
+    const current = displayEl.textContent.trim();
+    const hMatch = current.match(/(\d+)\s*h/);
+    const mMatch = current.match(/(\d+)\s*m/);
+    row.querySelector('.app-limit-hours').value = hMatch ? hMatch[1] : 0;
+    row.querySelector('.app-limit-minutes').value = mMatch ? mMatch[1] : 0;
+    displayEl.style.display = 'none';
+    row.querySelector('.app-limit-edit-row').style.display = 'flex';
+    row.querySelector('.app-limit-hours').focus();
+}
+
+function closeAppLimitEdit(btn) {
+    const row = btn.closest('.app-limit-row');
+    row.querySelector('.app-limit-edit-row').style.display = 'none';
+    row.querySelector('.app-limit-display').style.display = '';
+}
+
+async function saveAppLimit(btn) {
+    const row = btn.closest('.app-limit-row');
+    const detailsEl = btn.closest('details');
+    const app = JSON.parse(detailsEl.dataset.app);
+
+    const h = parseInt(row.querySelector('.app-limit-hours').value) || 0;
+    const m = parseInt(row.querySelector('.app-limit-minutes').value) || 0;
+    const limitStr = `${h}h ${String(m).padStart(2, '0')}m`;
+
+    btn.textContent = '…';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('http://127.0.0.1:5000/update-app-limit', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ record_id: app.limit_record_id, limit: limitStr })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            row.querySelector('.app-limit-display').textContent = limitStr;
+            app.limit = limitStr;
+            detailsEl.dataset.app = JSON.stringify(app);
+        } else {
+            console.error('saveAppLimit failed:', data.error);
+        }
+    } catch (e) {
+        console.error('saveAppLimit request failed:', e);
+    } finally {
+        btn.textContent = '✓';
+        btn.disabled = false;
+        closeAppLimitEdit(btn);
+    }
+}
+
+window.openAppLimitEdit = openAppLimitEdit;
+window.closeAppLimitEdit = closeAppLimitEdit;
+window.saveAppLimit = saveAppLimit;
 
 // ── Daily limit inline editing ──────────────────────────────────────────────
 
@@ -342,6 +480,7 @@ async function fetchMostUsedApps() {
         if (!apps.error) {
             cachedApps = apps;
             buildMostUsedGrid(apps, 'most-used-grid', false);
+            renderDailyOverview(apps);
         }
     } catch (e) { console.error('fetchMostUsedApps failed:', e); }
 }
@@ -545,7 +684,7 @@ function toggleGoalDone() {
     const text = document.getElementById('daily-goal-text').textContent;
     syncGoalToHome(text, goalDone);
 }
-function toggleHomeGoal(el) {
+function toggleHomeGoal() {
     // Mirror the done state back to settings
     goalDone = !goalDone;
     document.getElementById('daily-goal-display').classList.toggle('done', goalDone);
@@ -725,11 +864,12 @@ window.addNewTask = addNewTask;
 const XP_PER_LEVEL = 2000;
 
 const xpState = {
-    level: 11,
-    xp: 1487,
-    streak: 27,
+    level: 1,
+    xp: 0,
+    streak: 0,
     limitRewardedToday: false,
     streakRewardedSession: false,
+    seededFromAirtable: false,
 };
 
 function xpNeeded() {
@@ -738,19 +878,16 @@ function xpNeeded() {
 }
 
 function addXP(amount, reason) {
-    if (amount <= 0) return;
+    // Never add XP before Airtable values are loaded
+    if (!xpState.seededFromAirtable || amount <= 0) return;
 
-    // Streak multiplier: every 7-day streak tier adds +10% XP
     const multiplier = 1 + Math.floor(xpState.streak / 7) * 0.10;
     const earned = Math.round(amount * multiplier);
-
     xpState.xp += earned;
 
     let levelledUp = false;
-    while (true) {
-        const needed = xpNeeded();
-        if (xpState.xp < needed) break;
-        xpState.xp -= needed;
+    while (xpState.xp >= xpNeeded()) {
+        xpState.xp -= xpNeeded();
         xpState.level++;
         levelledUp = true;
     }
@@ -758,6 +895,16 @@ function addXP(amount, reason) {
     renderXP();
     showXPBubble(earned, reason);
     if (levelledUp) triggerLevelUp();
+
+    // Persist updated level & XP to Airtable
+    fetch('http://127.0.0.1:5000/update-xp', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level: xpState.level, exp: xpState.xp })
+    })
+        .then(r => r.json())
+        .then(d => { if (!d.ok) console.error('update-xp error:', d); })
+        .catch(e => console.error('update-xp fetch failed:', e));
 }
 
 function renderXP() {
@@ -819,9 +966,7 @@ function awardStreakBonus() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    renderXP();
-    // Small delay so the bar animates in on load
-    setTimeout(awardStreakBonus, 800);
+    // renderXP is called after Airtable sync sets real values
 });
 
 window.addXP = addXP;
@@ -961,3 +1106,75 @@ window.toggleReminderById = toggleReminderById;
 window.deleteReminder = deleteReminder;
 window.selectReminderCat = selectReminderCat;
 window.addNewReminder = addNewReminder;
+
+// ── Activities ────────────────────────────────────────────────────────────────
+
+const DIVISION_EMOJI = {
+    'motivation':       '🎯',
+    'cleaning':         '🧹',
+    'exercise':         '🏃',
+    'self improvement': '📚',
+    'health':           '💤',
+    'relaxing':         '🎵',
+};
+
+let activitiesState = []; // { name, length, division, done }
+
+function renderActivities() {
+    const list = document.getElementById('activities-list');
+    const badge = document.getElementById('activities-done-badge');
+    if (!list) return;
+
+    list.innerHTML = '';
+    const doneCount = activitiesState.filter(a => a.done).length;
+
+    if (badge) {
+        badge.textContent = doneCount > 0 ? `${doneCount} Done` : '';
+        badge.style.display = doneCount > 0 ? '' : 'none';
+    }
+
+    activitiesState.forEach((act, idx) => {
+        const emoji = DIVISION_EMOJI[act.division.toLowerCase()] || '⭐';
+        const isLast = idx === activitiesState.length - 1;
+        const row = document.createElement('div');
+        row.className = 'settings-activity-row';
+        if (isLast) row.style.cssText = 'border-bottom:none;margin-bottom:0;';
+        row.style.cursor = 'pointer';
+        row.innerHTML = `
+            <div class="settings-act-check${act.done ? ' done' : ''}" style="font-size:1.1rem;width:26px;height:26px;display:flex;align-items:center;justify-content:center;">
+                ${act.done
+                    ? `<svg width="12" height="12"><use href="#ic-check"/></svg>`
+                    : emoji}
+            </div>
+            <div class="settings-act-info">
+                <div class="settings-act-name">${act.name}</div>
+                <div class="settings-act-meta">${act.length}${act.done ? ' · Completed' : ''}</div>
+            </div>`;
+        row.onclick = () => toggleActivity(idx);
+        list.appendChild(row);
+    });
+}
+
+function toggleActivity(idx) {
+    if (activitiesState[idx].done) return;
+    activitiesState[idx].done = true;
+    addXP(50, 'Activity completed');
+    renderActivities();
+}
+
+async function fetchActivities() {
+    try {
+        const res = await fetch('http://127.0.0.1:5000/activities');
+        const data = await res.json();
+        if (Array.isArray(data)) {
+            activitiesState = data.map(a => ({ ...a, done: false }));
+            renderActivities();
+        }
+    } catch (e) {
+        console.error('fetchActivities error:', e);
+        const list = document.getElementById('activities-list');
+        if (list) list.innerHTML = '<p class="sub-text" style="margin:8px 0;">Could not load activities.</p>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', fetchActivities);
