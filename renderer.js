@@ -2,7 +2,7 @@
 
 async function syncLimitFromAirtable() {
     try {
-        const response = await fetch('http://127.0.0.1:5000/sync');
+        const response = await fetch('/api/sync');
         const data = await response.json();
 
         // If the server sent an error, stop here
@@ -179,7 +179,7 @@ async function removeApp(btn) {
 
     setCardBusy(detailsEl, true);
     try {
-        const res = await fetch('http://127.0.0.1:5000/remove-app', {
+        const res = await fetch('/api/remove-app', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ app_id: app.id })
@@ -205,7 +205,7 @@ async function moveApp(detailsEl, targetContainerId, targetIcon, direction) {
 
     setCardBusy(detailsEl, true);
     try {
-        const res = await fetch('http://127.0.0.1:5000/move-app', {
+        const res = await fetch('/api/move-app', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ app_id: app.id, direction })
@@ -269,7 +269,7 @@ async function saveAppLimit(btn) {
     btn.disabled = true;
 
     try {
-        const res = await fetch('http://127.0.0.1:5000/update-app-limit', {
+        const res = await fetch('/api/update-app-limit', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ record_id: app.limit_record_id, limit: limitStr })
@@ -325,7 +325,7 @@ async function saveDailyLimit() {
     saveBtn.disabled = true;
 
     try {
-        const res = await fetch('http://127.0.0.1:5000/update-limit', {
+        const res = await fetch('/api/update-limit', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ limit: limitStr })
@@ -382,7 +382,7 @@ async function fetchAllApps() {
     list.innerHTML = '<div class="modal-loading"><span class="spinner"></span> Loading apps…</div>';
 
     try {
-        const res = await fetch('http://127.0.0.1:5000/get-apps');
+        const res = await fetch('/api/get-apps');
         const data = await res.json();
         if (data.error) { list.innerHTML = `<p style="padding:20px;color:var(--danger-red);">${data.error}</p>`; return; }
         allAppsCache = data;
@@ -432,7 +432,7 @@ async function addAppFromModal(btn, appId, listType) {
     btn.textContent = '…';
 
     try {
-        const res = await fetch('http://127.0.0.1:5000/add-app', {
+        const res = await fetch('/api/add-app', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ app_id: appId, list_type: listType })
@@ -475,7 +475,7 @@ let cachedApps = [];
 
 async function fetchMostUsedApps() {
     try {
-        const res = await fetch('http://127.0.0.1:5000/get-apps');
+        const res = await fetch('/api/get-apps');
         const apps = await res.json();
         if (!apps.error) {
             cachedApps = apps;
@@ -897,7 +897,7 @@ function addXP(amount, reason) {
     if (levelledUp) triggerLevelUp();
 
     // Persist updated level & XP to Airtable
-    fetch('http://127.0.0.1:5000/update-xp', {
+    fetch('/api/update-xp', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ level: xpState.level, exp: xpState.xp })
@@ -1164,7 +1164,7 @@ function toggleActivity(idx) {
 
 async function fetchActivities() {
     try {
-        const res = await fetch('http://127.0.0.1:5000/activities');
+        const res = await fetch('/api/activities');
         const data = await res.json();
         if (Array.isArray(data)) {
             activitiesState = data.map(a => ({ ...a, done: false }));
